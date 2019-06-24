@@ -1,4 +1,5 @@
 # Import the commands extension
+import discord
 from discord.ext import commands
 
 # This is our base URL for all API calls
@@ -17,16 +18,18 @@ class Travis(commands.Cog):
     def __init__(self, bot):
         # Save our bot for later use
         self.bot = bot
+        # Save the tokens collection
+        self.tokens = bot.database["travis_tokens"]
 
     @commands.group()
     async def travis(self, ctx):
         """
-        The base for all of our Travis CI calls.
+        Group of commands for interacting with the Travis CI service.
         """
         pass
 
     @travis.command()
-    async def addtoken(self, ctx, token):
+    async def addtoken(self, ctx, token: str):
         """
         Adds a Travis CI token to your Discord User.
 
@@ -35,7 +38,26 @@ class Travis(commands.Cog):
         * Log into the command line (run `travis login`)
         * Generate a token (run `travis token`)
         """
-        pass
+        # Try to get a document with the user ID
+        existing = await self.tokens.find_one({"_id": ctx.author.id})
+
+        # If there is an existing item
+        if existing:
+            # Replace the existing values
+            await self.tokens.replace_one({"_id": ctx.author.id}, {"token": token})
+            # Notify the user
+            await ctx.send("Your existing token has been replaced!")
+        # Otherwise
+        else:
+            # Add a completely new item
+            await self.tokens.insert_one({"_id": ctx.author.id, "token": token})
+            # Notify the user
+            await ctx.send("Your token has been added!")
+
+        # If the user posted on a public text channel
+        if isinstance(ctx.channel, discord.TextChannel):
+            # Delete the original message
+            await ctx.message.delete()
 
 
 def setup(bot):
