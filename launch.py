@@ -35,8 +35,13 @@ def main():
 
     # Iterate over the python files from the ext folder
     for file in [x for x in os.listdir("ext") if x.endswith(".py")]:
-        # And add the extension without the extension
-        bot.load_extension("ext." + os.path.splitext(file)[0])
+        # Try to load the extension
+        try:
+            bot.load_extension("ext." + os.path.splitext(file)[0])
+        # If there was a problem, intercept the exception
+        # TODO: Change to real logging
+        except Exception:
+            print(f"Unable to load {file}")
 
     # We have everything, start loading the bot
     try:
