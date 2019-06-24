@@ -13,6 +13,7 @@ python:
 # Install the requirements during the install phase
 install:
   - pip install -r requirements.txt
+  - pip install -r requirements-dev.txt
 
 # During the running/script phase, just lint the text
 script:
