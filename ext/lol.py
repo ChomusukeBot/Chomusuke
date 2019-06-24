@@ -1,6 +1,8 @@
 # Import the commands extension
+import discord
 from discord.ext import commands
 import os
+import pprint
 
 BASE_URL = "https://na1.api.riotgames.com"
 SUMMONER_API = "/lol/summoner/v4/summoners/by-name/{}?api_key={}"
@@ -11,6 +13,7 @@ class LeagueCog(commands.Cog):
         # Save our bot for later use
         self.bot = bot
         self.league_key = os.environ["LEAGUE_TOKEN"]
+        # self.league_ver =
 
     @commands.command(name='lolprofile', aliases=["lp"])
     async def lolprofile(self, ctx, args):
@@ -18,7 +21,12 @@ class LeagueCog(commands.Cog):
             if(resp.status == 404):
                 await ctx.send("Summoner not found")
             data = await resp.json()
-        await ctx.send(data.get("summonerLevel"))
+        pprint.pprint(data)
+        embed = discord.Embed(title=data.get("name"))
+        embed.set_author(name=("Summoner Level - " + str(data.get("summonerLevel"))))
+        embed.set_thumbnail(url="http://ddragon.leagueoflegends.com/cdn/9.12.1/img/profileicon/{}.png".format(data.get("profileIconId")))
+
+        await ctx.send(embed=embed)
 
 
 def setup(bot):
