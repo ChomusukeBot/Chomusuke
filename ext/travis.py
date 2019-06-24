@@ -1,6 +1,14 @@
 # Import the commands extension
 from discord.ext import commands
 
+# This is our base URL for all API calls
+BASE = "https://api.travis-ci.com"
+# Our default headers for all of the requests
+DEFAULT_HEADERS = {
+    "Travis-API-Version": "3",
+    "User-Agent": "Chomusuke (+https://github.com/justalemon/Chomusuke)"
+}
+
 
 class Travis(commands.Cog):
     """
