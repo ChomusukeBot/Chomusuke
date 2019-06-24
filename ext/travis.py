@@ -18,6 +18,13 @@ class Travis(commands.Cog):
         # Save our bot for later use
         self.bot = bot
 
+    @commands.group()
+    async def travis(self, ctx):
+        """
+        The base for all of our Travis CI calls.
+        """
+        pass
+
 
 def setup(bot):
     """
