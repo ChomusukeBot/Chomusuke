@@ -9,9 +9,6 @@ class Chomusuke(commands.AutoShardedBot):
     Custom base class for the Chomusuke bot.
     """
     def __init__(self, *args, **kwargs):
-        # Create a Client Session for using REST APIs
-        self.session = aiohttp.ClientSession(loop=self.loop)
-
         # If there is a MongoDB URL in the keyword arguments
         if "database" in kwargs:
             # Create the MongoDB/Motor instance
@@ -25,3 +22,6 @@ class Chomusuke(commands.AutoShardedBot):
 
         # Initialize the usual bot
         super().__init__(*args, **kwargs)
+
+        # Create a Client Session for using REST APIs
+        self.session = aiohttp.ClientSession(loop=self.loop)
