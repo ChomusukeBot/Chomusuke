@@ -20,13 +20,28 @@ def main():
         # Exit with a code 3
         sys.exit(3)
 
+    # Create a dictionary of keyword arguments
+    kwargs = {
+        "command_prefix": os.environ["DISCORD_PREFIX"]
+    }
+
+    # If there is a MongoDB database added
+    if "MONGODB_URL" in os.environ:
+        # Add the database to our keyword arguments
+        kwargs["database"] = os.environ["MONGODB_URL"]
+
     # Create our bot instance
-    bot = Chomusuke(command_prefix=os.environ["DISCORD_PREFIX"])
+    bot = Chomusuke(**kwargs)
 
     # Iterate over the python files from the ext folder
     for file in [x for x in os.listdir("ext") if x.endswith(".py")]:
-        # And add the extension without the extension
-        bot.load_extension("ext." + os.path.splitext(file)[0])
+        # Try to load the extension
+        try:
+            bot.load_extension("ext." + os.path.splitext(file)[0])
+        # If there was a problem, intercept the exception
+        # TODO: Change to real logging
+        except Exception:
+            print(f"Unable to load {file}")
 
     # We have everything, start loading the bot
     try:
