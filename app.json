@@ -10,6 +10,10 @@
         "DISCORD_PREFIX": {
             "description": "The Prefix to use on the commands.",
             "required": true
+        },
+        "MONGODB_URL": {
+            "description": "MongoDB instance to use. Leave at blank to disable database usage.",
+            "required": false
         }
     }
 }
