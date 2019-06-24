@@ -1,4 +1,5 @@
 # Import our little set of tools
+import asyncio
 import os
 import sys
 # Import the bot class
@@ -26,6 +27,26 @@ def main():
     for file in [x for x in os.listdir("ext") if x.endswith(".py")]:
         # And add the extension without the extension
         bot.load_extension("ext." + os.path.splitext(file)[0])
+
+    # We have everything, start loading the bot
+    try:
+        # Get the event loop
+        loop = asyncio.get_event_loop()
+        # Log and connect the user
+        loop.run_until_complete(bot.login(os.environ["DISCORD_TOKEN"]))
+        loop.run_until_complete(bot.connect())
+    except KeyboardInterrupt:
+        # After a CTRL+C or CTRL+Z, log out the bot and disconnect everything
+        loop.run_until_complete(bot.logout())
+    finally:
+        # Afer finishing, grab all tasks
+        tasks = asyncio.all_tasks(loop)
+        # Run all of the tasks until they have completed
+        loop.run_until_complete(asyncio.gather(*tasks))
+        # Only after the tasks have been completed, close the loop
+        loop.close()
+        # Finally, exit with a code zero
+        sys.exit(0)
 
 
 if __name__ == "__main__":
