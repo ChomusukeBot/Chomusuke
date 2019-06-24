@@ -25,6 +25,18 @@ class Travis(commands.Cog):
         """
         pass
 
+    @travis.command()
+    async def addtoken(self, ctx, token):
+        """
+        Adds a Travis CI token to your Discord User.
+
+        To get a token:
+        * Install the [Travis Command Line](https://github.com/travis-ci/travis.rb#installation)
+        * Log into the command line (run `travis login`)
+        * Generate a token (run `travis token`)
+        """
+        pass
+
 
 def setup(bot):
     """
