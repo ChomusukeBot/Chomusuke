@@ -1,0 +1,15 @@
+{
+    "name": "Chomusuke",
+    "description": "Chomusuke is a Discord Bot created during Discord Hack Week #1 with the intent to provide tools to make your server a productive environment.",
+    "repository": "https://github.com/justalemon/Chomusuke",
+    "env": {
+        "DISCORD_TOKEN": {
+            "description": "The Bot Token to log into Discord.",
+            "required": true
+        },
+        "DISCORD_PREFIX": {
+            "description": "The Prefix to use on the commands.",
+            "required": true
+        }
+    }
+}
