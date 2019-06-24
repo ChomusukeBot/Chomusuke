@@ -1,6 +1,9 @@
 # Use Ubuntu 16.04 LTS
 dist: xenial
 
+# Set the language to Python
+language: python
+
 # Do the testing on Python 3.6 and 3.7
 # Minimum version supported and latest stable respectively
 python:
