@@ -1,4 +1,5 @@
 # Import the commands extension and the rest of our tools
+import traceback
 from discord.ext import commands
 from os.path import isfile
 
@@ -29,9 +30,9 @@ class Owner(commands.Cog):
             self.bot.unload_extension(f"ext.{extension}")
             await ctx.send(f"{extension} has been unloaded.")
         # In the case of an exception
-        except Exception as e:
+        except Exception:
             # Just send the traceback
-            await ctx.send(f"```{e.print_exc()}```")
+            await ctx.send(f"```{traceback.format_exc()}```")
 
     @commands.command()
     async def load(self, ctx, extension: str):
@@ -49,9 +50,9 @@ class Owner(commands.Cog):
             self.bot.load_extension(f"ext.{extension}")
             await ctx.send(f"{extension} has been loaded.")
         # In the case of an exception
-        except Exception as e:
+        except Exception:
             # Just send the traceback
-            await ctx.send(f"```{e.print_exc()}```")
+            await ctx.send(f"```{traceback.format_exc()}```")
 
 
 def setup(bot):
