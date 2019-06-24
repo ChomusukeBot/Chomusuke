@@ -1,0 +1,16 @@
+# Use Ubuntu 16.04 LTS
+dist: xenial
+
+# Do the testing on Python 3.6 and 3.7
+# Minimum version supported and latest stable respectively
+python:
+  - 3.6
+  - 3.7
+
+# Install the requirements during the install phase
+install:
+  - pip install -r requirements.txt
+
+# During the running/script phase, just lint the text
+script:
+  - flake8
