@@ -13,12 +13,15 @@ class Chomusuke(commands.AutoShardedBot):
         if "database" in kwargs:
             # Create the MongoDB/Motor instance
             self.mongo = AsyncIOMotorClient(kwargs["database"])
+            # Save the bot database
+            self.database = self.mongo.chomusuke
             # And pop the argument
             kwargs.pop("database")
         # Otherwise
         else:
             # Set the database to null
             self.mongo = None
+            self.database = None
 
         # Initialize the usual bot
         super().__init__(*args, **kwargs)
