@@ -36,9 +36,9 @@ class Travis(commands.Cog):
         Adds a Travis CI token to your Discord User.
 
         To get a token:
-        * Install the [Travis Command Line](https://github.com/travis-ci/travis.rb#installation)
-        * Log into the command line (run `travis login`)
-        * Generate a token (run `travis token`)
+        * Install the Travis Command Line from https://github.com/travis-ci/travis.rb#installation
+        * Log into the command line (run "travis login --pro")
+        * Generate a token (run "travis token --pro")
         """
         # Try to get a document with the user ID
         existing = await self.tokens.find_one({"_id": ctx.author.id})
