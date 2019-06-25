@@ -6,13 +6,13 @@ class Cog(commands.Cog):
     """
     A custom Cog Class to comply with the GDPR.
     """
-    async def dump(self) -> dict:
+    async def dump(self, ctx) -> dict:
         """
         Dumps all of the Cog data into a dictionary.
         """
         return {}
 
-    async def forget(self) -> bool:
+    async def forget(self, ctx) -> bool:
         """
         Removes all of the data from the cog.
         """
