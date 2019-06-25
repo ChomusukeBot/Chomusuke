@@ -2,7 +2,6 @@
 import discord
 from discord.ext import commands
 import os
-import pprint
 import requests
 import json
 
@@ -34,7 +33,6 @@ class LeagueCog(commands.Cog):
 
     @commands.command(name='lolprofile', aliases=["lp"])
     async def lolprofile(self, ctx, *args):
-        print(self.league_ver)
         if(args[0].lower() in REGIONS):
             region = REGIONS.get(args[0].lower())
         else:
@@ -45,9 +43,8 @@ class LeagueCog(commands.Cog):
             if(resp.status == 404):
                 await ctx.send("Summoner not found")
                 return
-
             data = await resp.json()
-        pprint.pprint(data)
+
         embed = discord.Embed(title=data.get("name"))
         embed.set_author(name=("Summoner Level - " + str(data.get("summonerLevel"))))
         embed.set_thumbnail(url="http://ddragon.leagueoflegends.com/cdn/{}/img/profileicon/{}.png".format(self.league_ver, data.get("profileIconId")))
