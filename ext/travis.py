@@ -9,6 +9,7 @@ BASE = "https://api.travis-ci.com"
 # A list of available endpoints
 EP_USER = "/user"
 EP_REPOS = "/repos"
+EP_REQUESTS = "/repo/{0}/requests"
 # Travis CI brand colors (https://travis-ci.com/logo)
 OXIDE_BLUE = 0x3EAAAF
 TURF_GREEN = 0x39AA56
@@ -168,6 +169,43 @@ class Travis(commands.Cog):
 
         # Finally, send the embed
         await ctx.send(embed=embed)
+
+    @travis.command()
+    async def trigger(self, ctx, slug: str = None):
+        """
+        Triggers a build for the specified repo.
+        """
+        # Send a typing
+        await ctx.trigger_typing()
+        # Get the current user token
+        token = (await self.get_token(ctx.author.id))["token"]
+
+        # Create a copy of the default haders
+        headers = copy.deepcopy(DEFAULT_HEADERS)
+        # Set the token specified by the user
+        headers["Authorization"] = f"token {token}"
+
+        # Use either the specified repo or the slug
+        repo = slug or (await self.picks.find_one({"_id": ctx.author.id}))["slug"]
+
+        # If there is no repo, notify and return
+        if not repo:
+            await ctx.send("You need to specify a repo either via parameters or commands.")
+            return
+
+        # Create the data or body
+        data = {
+            "message": f"Chomusuke: Triggered by {ctx.author.name} from Discord"
+        }
+
+        # Request the list of user repos
+        async with self.bot.session.post(BASE + EP_REQUESTS.format(repo.replace("/", "%2F")), data=data, headers=headers) as resp:
+            # If we didn't got a code 202, notify the user and return
+            if resp.status != 202:
+                await ctx.send(f"We were unable to start a build: Code {resp.status}")
+
+        # After we have the commit created, return the URL of the build
+        await ctx.send(f"A Build has been triggered!\nYou can find your Build at https://travis-ci.com/{repo}/builds.")
 
 
 def setup(bot):
