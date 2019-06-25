@@ -114,7 +114,7 @@ class Travis(commands.Cog):
         await ctx.trigger_typing()
 
         # Request the list of user repos
-        async with self.bot.session.get(BASE + EP_REPOS, headers=self.generate_headers(ctx)) as resp:
+        async with self.bot.session.get(BASE + EP_REPOS, headers=await self.generate_headers(ctx)) as resp:
             # If we didn't got a code 200, notify the user and return
             if resp.status != 200:
                 await ctx.send(f"Unable to get your list of repos: Code {resp.status}")
@@ -147,7 +147,7 @@ class Travis(commands.Cog):
         desc = ""
 
         # Request the list of user repos
-        async with self.bot.session.get(BASE + EP_REPOS, headers=self.generate_headers(ctx)) as resp:
+        async with self.bot.session.get(BASE + EP_REPOS, headers=await self.generate_headers(ctx)) as resp:
             # If we didn't got a code 200, notify the user and return
             if resp.status != 200:
                 await ctx.send(f"Unable to get your list of repos: Code {resp.status}")
@@ -192,7 +192,8 @@ class Travis(commands.Cog):
         }
 
         # Request the list of user repos
-        async with self.bot.session.post(BASE + EP_REQUESTS.format(repo.replace("/", "%2F")), data=data, headers=self.generate_headers(ctx)) as resp:
+        async with self.bot.session.post(BASE + EP_REQUESTS.format(repo.replace("/", "%2F")), data=data,
+                                         headers=await self.generate_headers(ctx)) as resp:
             # If we didn't got a code 202, notify the user and return
             if resp.status != 202:
                 await ctx.send(f"We were unable to start a build: Code {resp.status}")
