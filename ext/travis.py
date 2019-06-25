@@ -75,21 +75,10 @@ class Travis(commands.Cog):
                 await ctx.send("The token that has been specified is not valid.")
             # If the code is 200
             elif resp.status == 200:
-                # Try to get a document with the user ID
-                existing = await self.tokens.find_one({"_id": ctx.author.id})
-
-                # If there is an existing item
-                if existing:
-                    # Replace the existing values
-                    await self.tokens.replace_one({"_id": ctx.author.id}, {"token": token})
-                    # Notify the user
-                    await ctx.send("Your existing token has been replaced!")
-                # Otherwise
-                else:
-                    # Add a completely new item
-                    await self.tokens.insert_one({"_id": ctx.author.id, "token": token})
-                    # Notify the user
-                    await ctx.send("Your token has been added!")
+                # Update an item and create it if is not present
+                await self.tokens.replace_one({"_id": ctx.author.id}, {"_id": ctx.author.id, "token": token}, True)
+                # Notify the user
+                await ctx.send("Your token has been updated!")
             # If the code is anything else
             else:
                 await ctx.send(f"Error while checking for your token: Code {resp.status}")
@@ -132,18 +121,8 @@ class Travis(commands.Cog):
             await ctx.send("We were unable to find a repo with that slug.")
             return
 
-        # Try to get a document with the user ID
-        existing = await self.picks.find_one({"_id": ctx.author.id})
-
-        # If there is an existing item
-        if existing:
-            # Replace the existing values
-            await self.picks.replace_one({"_id": ctx.author.id}, {"slug": picks[0]["slug"]})
-        # Otherwise
-        else:
-            # Add a completely new item
-            await self.picks.insert_one({"_id": ctx.author.id, "slug": picks[0]["slug"]})
-
+        # Update an item and create it if is not present
+        await self.picks.replace_one({"_id": ctx.author.id}, {"_id": ctx.author.id, "slug": picks[0]["slug"]}, True)
         # Finally notify the user
         await ctx.send("You have choosen {0} for your next operations.".format(picks[0]["slug"]))
 
