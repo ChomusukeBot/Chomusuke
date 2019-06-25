@@ -4,7 +4,7 @@ from discord.ext import commands
 import os
 import pprint
 
-BASE_URL = "https://na1.api.riotgames.com"
+BASE_URL = "https://{}.api.riotgames.com"
 SUMMONER_API = "/lol/summoner/v4/summoners/by-name/{}?api_key={}"
 
 REGIONS = {
@@ -31,8 +31,14 @@ class LeagueCog(commands.Cog):
         # self.league_ver =
 
     @commands.command(name='lolprofile', aliases=["lp"])
-    async def lolprofile(self, ctx, args):
-        async with self.bot.session.get(BASE_URL + SUMMONER_API.format(args, self.league_key)) as resp:
+    async def lolprofile(self, ctx, *args):
+        if(args[0].lower() in REGIONS):
+            region = REGIONS.get(args[0].lower())
+        else:
+            await ctx.send("Region not found. Use one of the following: \n BR, EUNE, EUW, JP, KR, LAN, LAS, NA, OCE, TR, RU, PBE")
+            return
+
+        async with self.bot.session.get(BASE_URL.format(region) + SUMMONER_API.format('{}'.format(' '.join(args[1:])), self.league_key)) as resp:
             if(resp.status == 404):
                 await ctx.send("Summoner not found")
             data = await resp.json()
