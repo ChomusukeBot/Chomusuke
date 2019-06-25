@@ -7,6 +7,12 @@ from discord.ext import commands
 BASE = "https://api.travis-ci.com"
 # A list of available endpoints
 EP_USER = "/user"
+# Travis CI brand colors (https://travis-ci.com/logo)
+OXIDE_BLUE = 0x3EAAAF
+TURF_GREEN = 0x39AA56
+CANARY_YELLOW = 0xEDDE3F
+BRICK_RED = 0xDB4545
+ASPHALT_GREY = 0x666666
 # Our default headers for all of the requests
 DEFAULT_HEADERS = {
     "Travis-API-Version": "3",
