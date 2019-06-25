@@ -38,6 +38,33 @@ class Travis(Cog):
         self.tokens = bot.database["travis_tokens"]
         self.picks = bot.database["travis_picks"]
 
+    async def dump_data(self, ctx):
+        """
+        Returns the Travis related data.
+        """
+        # Get the token of the user and stored pick
+        token = await self.tokens.find_one({"_id": ctx.author.id})
+        pick = await self.picks.find_one({"_id": ctx.author.id})
+        # Create a place to store the dict
+        data = {}
+        # If there is a token found, add it into the group
+        if token:
+            data["token"] = token["token"]
+        # If there is a pick found, add it into the group
+        if pick:
+            data["pick"] = pick["slug"]
+        # Finally, return the data
+        return data
+
+    async def forget_data(self, ctx):
+        """
+        Removes the user data from the Travis collections.
+        """
+        # Just delete those with the id of the user
+        self.tokens.delete_many({"_id": ctx.author.id})
+        self.picks.delete_many({"_id": ctx.author.id})
+        return True
+
     async def get_token(self, _id: int):
         """
         Makes sure that a command is ready for the user.
