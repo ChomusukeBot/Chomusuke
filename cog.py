@@ -12,8 +12,8 @@ class Cog(commands.Cog):
         """
         return {}
 
-    async def forget(self) -> dict:
+    async def forget(self) -> bool:
         """
         Removes all of the data from the cog.
         """
-        return {}
+        return False
