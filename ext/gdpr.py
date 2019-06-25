@@ -5,6 +5,10 @@ import json
 from cog import Cog
 from discord.ext import commands
 
+REMOVAL = ("Cogs that had data and was removed: {0}\n"
+           "Cogs that didn't had data or were unable to delete it: {1}\n\n"
+           "Please note that data owned by 3rd parties (GitHub, Travis CI, Discord) can't be deleted by us.")
+
 
 class GDPR(Cog):
     """
@@ -43,6 +47,31 @@ class GDPR(Cog):
         file = discord.File(string, "data.json")
         # Send the JSON via private messages
         await ctx.author.send(file=file)
+
+    @gdpr.command()
+    @commands.cooldown(1, 60 * 12, commands.BucketType.user)
+    async def forget(self, ctx):
+        """
+        Removes all of your data from the bot.
+        """
+        # Notify the user
+        await ctx.author.send("Your data is being removed, please wait...")
+
+        # Create a place to store the names
+        yes = []
+        no = []
+
+        # Iterate over the bot cogs
+        for name, cog in self.bot.cogs.items():
+            # If it was possible to remove data, add the name on the yes list
+            if await cog.forget_data(ctx):
+                yes.append(name)
+            # Otherwise, add it into the no list
+            else:
+                no.append(name)
+
+        # Finish by notifying the user
+        await ctx.author.send(REMOVAL.format(", ".join(yes), ", ".join(no)))
 
 
 def setup(bot):
