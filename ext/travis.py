@@ -32,6 +32,7 @@ class Travis(commands.Cog):
         pass
 
     @travis.command()
+    @commands.cooldown(1, 60, commands.BucketType.user)
     async def addtoken(self, ctx, token: str):
         """
         Adds a Travis CI token to your Discord User.
