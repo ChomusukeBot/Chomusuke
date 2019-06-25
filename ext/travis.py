@@ -77,6 +77,9 @@ class Travis(commands.Cog):
         * Log into the command line (run "travis login --pro")
         * Generate a token (run "travis token --pro")
         """
+        # Send a typing
+        await ctx.trigger_typing()
+
         # Create a copy of the default haders
         headers = copy.deepcopy(DEFAULT_HEADERS)
         # Set the token specified by the user
