@@ -1,4 +1,5 @@
 # Import the commands extension
+import copy
 import discord
 from discord.ext import commands
 
@@ -40,20 +41,8 @@ class Travis(commands.Cog):
         * Log into the command line (run "travis login --pro")
         * Generate a token (run "travis token --pro")
         """
-        # Try to get a document with the user ID
-        existing = await self.tokens.find_one({"_id": ctx.author.id})
-
-        # If there is an existing item
-        if existing:
-            # Replace the existing values
-            await self.tokens.replace_one({"_id": ctx.author.id}, {"token": token})
-            # Notify the user
-            await ctx.send("Your existing token has been replaced!")
-            # And return
-            return
-
         # Create a copy of the default haders
-        headers = dict(DEFAULT_HEADERS)
+        headers = copy.deepcopy(DEFAULT_HEADERS)
         # Set the token specified by the user
         headers["Authorization"] = f"token {token}"
 
@@ -64,10 +53,21 @@ class Travis(commands.Cog):
                 await ctx.send("The token that has been specified is not valid.")
             # If the code is 200
             elif resp.status == 200:
-                # Add a completely new item
-                await self.tokens.insert_one({"_id": ctx.author.id, "token": token})
-                # Notify the user
-                await ctx.send("Your token has been added!")
+                # Try to get a document with the user ID
+                existing = await self.tokens.find_one({"_id": ctx.author.id})
+
+                # If there is an existing item
+                if existing:
+                    # Replace the existing values
+                    await self.tokens.replace_one({"_id": ctx.author.id}, {"token": token})
+                    # Notify the user
+                    await ctx.send("Your existing token has been replaced!")
+                # Otherwise
+                else:
+                    # Add a completely new item
+                    await self.tokens.insert_one({"_id": ctx.author.id, "token": token})
+                    # Notify the user
+                    await ctx.send("Your token has been added!")
             # If the code is anything else
             else:
                 await ctx.send(f"Error while checking for your token: Code {resp.status}")
