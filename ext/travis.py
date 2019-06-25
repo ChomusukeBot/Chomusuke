@@ -29,8 +29,9 @@ class Travis(commands.Cog):
     def __init__(self, bot):
         # Save our bot for later use
         self.bot = bot
-        # Save the tokens collection
+        # Save the collections
         self.tokens = bot.database["travis_tokens"]
+        self.picks = bot.database["travis_picks"]
 
     async def get_token(self, _id: int):
         """
@@ -97,6 +98,54 @@ class Travis(commands.Cog):
         if isinstance(ctx.channel, discord.TextChannel):
             # Delete the original message
             await ctx.message.delete()
+
+    @travis.command()
+    async def pick(self, ctx, slug: str):
+        """
+        Chooses a repo with the specified slug for future operations.
+        """
+        # Send a typing
+        await ctx.trigger_typing()
+        # Get the current user token
+        token = (await self.get_token(ctx.author.id))["token"]
+
+        # Create a copy of the default haders
+        headers = copy.deepcopy(DEFAULT_HEADERS)
+        # Set the token specified by the user
+        headers["Authorization"] = f"token {token}"
+
+        # Request the list of user repos
+        async with self.bot.session.get(BASE + EP_REPOS, headers=headers) as resp:
+            # If we didn't got a code 200, notify the user and return
+            if resp.status != 200:
+                await ctx.send(f"Unable to get your list of repos: Code {resp.status}")
+                return
+
+            # Parse the response as JSON
+            json = await resp.json()
+
+        # Store the picks
+        picks = [x for x in json["repositories"] if slug.casefold() == x["slug"].casefold()]
+
+        # If there was no matches
+        if not picks:
+            await ctx.send("We were unable to find a repo with that slug.")
+            return
+
+        # Try to get a document with the user ID
+        existing = await self.picks.find_one({"_id": ctx.author.id})
+
+        # If there is an existing item
+        if existing:
+            # Replace the existing values
+            await self.picks.replace_one({"_id": ctx.author.id}, {"slug": picks[0]["slug"]})
+        # Otherwise
+        else:
+            # Add a completely new item
+            await self.picks.insert_one({"_id": ctx.author.id, "slug": picks[0]["slug"]})
+
+        # Finally notify the user
+        await ctx.send("You have choosen {0} for your next operations.".format(picks[0]["slug"]))
 
     @travis.command()
     async def repos(self, ctx):
