@@ -175,19 +175,14 @@ class Travis(commands.Cog):
         await ctx.send(embed=embed)
 
     @travis.command()
-    async def trigger(self, ctx, slug: str = None):
+    async def trigger(self, ctx):
         """
         Triggers a build for the specified repo.
         """
         # Send a typing
         await ctx.trigger_typing()
         # Use either the specified repo or the slug
-        repo = slug or (await self.picks.find_one({"_id": ctx.author.id}))["slug"]
-
-        # If there is no repo, notify and return
-        if not repo:
-            await ctx.send("You need to specify a repo either via parameters or commands.")
-            return
+        repo = (await self.picks.find_one({"_id": ctx.author.id}))["slug"]
 
         # Create the data or body
         data = {
@@ -214,11 +209,7 @@ class Travis(commands.Cog):
         await ctx.trigger_typing()
 
         # Use either the specified repo or the slug
-        repo = slug or (await self.picks.find_one({"_id": ctx.author.id}))["slug"]
-        # If there is no repo, notify and return
-        if not repo:
-            await ctx.send("You need to specify a repo either via parameters or commands.")
-            return
+        repo = (await self.picks.find_one({"_id": ctx.author.id}))["slug"]
 
         # Request the list of builds for that repository
         async with self.bot.session.get(BASE + EP_BUILDS.format(repo.replace("/", "%2F")), headers=await self.generate_headers(ctx)) as resp:
