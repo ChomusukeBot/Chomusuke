@@ -178,7 +178,6 @@ class Travis(commands.Cog):
         """
         # Send a typing
         await ctx.trigger_typing()
-
         # Use either the specified repo or the slug
         repo = slug or (await self.picks.find_one({"_id": ctx.author.id}))["slug"]
 
@@ -197,6 +196,7 @@ class Travis(commands.Cog):
             # If we didn't got a code 202, notify the user and return
             if resp.status != 202:
                 await ctx.send(f"We were unable to start a build: Code {resp.status}")
+                return
 
         # After we have the commit created, return the URL of the build
         await ctx.send(f"A Build has been triggered!\nYou can find your Build at https://travis-ci.com/{repo}/builds.")
