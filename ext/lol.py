@@ -4,6 +4,7 @@ from discord.ext import commands
 import os
 import requests
 import json
+import pprint
 
 # Base URL for all API calls
 BASE_URL = "https://{}.api.riotgames.com"
@@ -82,6 +83,30 @@ class LeagueCog(commands.Cog):
             embed.add_field(name="Unranked", value="\u200b", inline=True)
 
         await ctx.send(embed=embed)
+
+    @commands.command(name='lolmatches', aliases=["lm"])
+    async def lolmatches(self, ctx, *args):
+        # Check if the specified region is correct
+        if(args[0].lower() in REGIONS):
+            region = REGIONS.get(args[0].lower())
+        else:
+            await ctx.send("Region not found. Use one of the following: \nBR, EUNE, EUW, JP, KR, LAN, LAS, NA, OCE, TR, RU, PBE")
+            return
+        # Request the summoner data
+        async with self.bot.session.get(BASE_URL.format(region) + SUMMONER_API.format('{}'.format(' '.join(args[1:])), self.league_key)) as resp:
+            # If the code is 404
+            if(resp.status == 404):
+                await ctx.send("Summoner not found")
+                return
+            # If the code is 200
+            elif(resp.status == 200):
+                data = await resp.json()
+                print(data)
+
+        async with self.bot.session.get(BASE_URL.format(region) + MATCH_API.format(data.get("accountId"), self.league_key)) as resp:
+            rankData = await resp.json()
+            pprint.pprint(rankData)
+        await ctx.send("LM")
 
 
 def setup(bot):
