@@ -55,11 +55,11 @@ class LeagueCog(commands.Cog):
 
         async with self.bot.session.get(BASE_URL.format(region) + RANKED_API.format(data.get("id"), self.league_key)) as resp:
             rankData = await resp.json()
-            
-        rankData = rankData[0]
-        embed.add_field(name="Rank", value=("{} {}".format(rankData.get("tier"), rankData.get("rank"))), inline=True)
-        embed.add_field(name="Ranked W/L", value=("{}/{}".format(rankData.get("wins"), rankData.get("losses"))), inline=True)
-        embed.add_field(name="League Points", value=rankData.get("leaguePoints"), inline=True)
+        if rankData:
+            rankData = rankData[0]
+            embed.add_field(name="Rank", value=("{} {}".format(rankData.get("tier"), rankData.get("rank"))), inline=True)
+            embed.add_field(name="Ranked W/L", value=("{}/{}".format(rankData.get("wins"), rankData.get("losses"))), inline=True)
+            embed.add_field(name="League Points", value=rankData.get("leaguePoints"), inline=True)
 
         await ctx.send(embed=embed)
 
