@@ -13,6 +13,8 @@ PROFILE_IMAGE_URL = "http://ddragon.leagueoflegends.com/cdn/{}/img/profileicon/{
 SUMMONER_API = "/lol/summoner/v4/summoners/by-name/{}?api_key={}"
 # API Operation used to access summoner ranked data
 RANKED_API = "/lol/league/v4/entries/by-summoner/{}?api_key={}"
+# API Operation used to access summoner matchlist
+MATCH_API = "/lol/match/v4/matchlists/by-account/{}?api_key={}"
 # A .json file storing the current and all previous versions of league of legends
 LEAGUE_VERSION = "https://ddragon.leagueoflegends.com/api/versions.json"
 # A dictionary of RIOT's regional endpoints and their corresponding server shortcuts
@@ -76,6 +78,8 @@ class LeagueCog(commands.Cog):
             embed.add_field(name="Rank", value=("{} {}".format(rankData.get("tier"), rankData.get("rank"))), inline=True)
             embed.add_field(name="Ranked W/L", value=("{}/{}".format(rankData.get("wins"), rankData.get("losses"))), inline=True)
             embed.add_field(name="League Points", value=rankData.get("leaguePoints"), inline=True)
+        else:
+            embed.add_field(name="Unranked", value="\u200b", inline=True)
 
         await ctx.send(embed=embed)
 
