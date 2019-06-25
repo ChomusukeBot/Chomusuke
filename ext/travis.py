@@ -1,6 +1,7 @@
 # Import the commands extension
 import copy
 import discord
+from cog import Cog
 from discord.ext import commands
 from exceptions import NoTokenSet
 
@@ -26,7 +27,7 @@ DEFAULT_HEADERS = {
 }
 
 
-class Travis(commands.Cog):
+class Travis(Cog):
     """
     A cog for accessing the Travis CI API.
     """
