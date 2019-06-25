@@ -178,13 +178,6 @@ class Travis(commands.Cog):
         """
         # Send a typing
         await ctx.trigger_typing()
-        # Get the current user token
-        token = (await self.get_token(ctx.author.id))["token"]
-
-        # Create a copy of the default haders
-        headers = copy.deepcopy(DEFAULT_HEADERS)
-        # Set the token specified by the user
-        headers["Authorization"] = f"token {token}"
 
         # Use either the specified repo or the slug
         repo = slug or (await self.picks.find_one({"_id": ctx.author.id}))["slug"]
@@ -200,7 +193,7 @@ class Travis(commands.Cog):
         }
 
         # Request the list of user repos
-        async with self.bot.session.post(BASE + EP_REQUESTS.format(repo.replace("/", "%2F")), data=data, headers=headers) as resp:
+        async with self.bot.session.post(BASE + EP_REQUESTS.format(repo.replace("/", "%2F")), data=data, headers=self.generate_headers(ctx)) as resp:
             # If we didn't got a code 202, notify the user and return
             if resp.status != 202:
                 await ctx.send(f"We were unable to start a build: Code {resp.status}")
