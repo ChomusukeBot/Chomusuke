@@ -6,6 +6,7 @@ import requests
 import json
 
 BASE_URL = "https://{}.api.riotgames.com"
+PROFILE_IMAGE_URL = "http://ddragon.leagueoflegends.com/cdn/{}/img/profileicon/{}.png"
 SUMMONER_API = "/lol/summoner/v4/summoners/by-name/{}?api_key={}"
 RANKED_API = "/lol/league/v4/entries/by-summoner/{}?api_key={}"
 
@@ -26,6 +27,9 @@ REGIONS = {
 
 
 class LeagueCog(commands.Cog):
+    """
+    A cog for accessing the League of Legends API.
+    """
     def __init__(self, bot):
         # Save our bot for later use
         self.bot = bot
@@ -37,7 +41,7 @@ class LeagueCog(commands.Cog):
         if(args[0].lower() in REGIONS):
             region = REGIONS.get(args[0].lower())
         else:
-            await ctx.send("Region not found. Use one of the following: \n BR, EUNE, EUW, JP, KR, LAN, LAS, NA, OCE, TR, RU, PBE")
+            await ctx.send("Region not found. Use one of the following: \nBR, EUNE, EUW, JP, KR, LAN, LAS, NA, OCE, TR, RU, PBE")
             return
 
         async with self.bot.session.get(BASE_URL.format(region) + SUMMONER_API.format('{}'.format(' '.join(args[1:])), self.league_key)) as resp:
@@ -48,7 +52,7 @@ class LeagueCog(commands.Cog):
 
         embed = discord.Embed(title=data.get("name"))
         embed.set_author(name=("Summoner Level - " + str(data.get("summonerLevel"))))
-        embed.set_thumbnail(url="http://ddragon.leagueoflegends.com/cdn/{}/img/profileicon/{}.png".format(self.league_ver, data.get("profileIconId")))
+        embed.set_thumbnail(url=PROFILE_IMAGE_URL.format(self.league_ver, data.get("profileIconId")))
 
         async with self.bot.session.get(BASE_URL.format(region) + RANKED_API.format(data.get("id"), self.league_key)) as resp:
             rankData = await resp.json()
