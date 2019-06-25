@@ -15,7 +15,8 @@ SUMMONER_API = "/lol/summoner/v4/summoners/by-name/{}?api_key={}"
 # API Operation used to access summoner ranked data
 RANKED_API = "/lol/league/v4/entries/by-summoner/{}?api_key={}"
 # API Operation used to access summoner matchlist
-MATCH_API = "/lol/match/v4/matchlists/by-account/{}?api_key={}"
+MATCHES_API = "/lol/match/v4/matchlists/by-account/{}?api_key={}"
+MATCH_API = "/lol/match/v4/matches/{}?api_key={}"
 # A .json file storing the current and all previous versions of league of legends
 LEAGUE_VERSION = "https://ddragon.leagueoflegends.com/api/versions.json"
 # A dictionary of RIOT's regional endpoints and their corresponding server shortcuts
@@ -101,11 +102,16 @@ class LeagueCog(commands.Cog):
             # If the code is 200
             elif(resp.status == 200):
                 data = await resp.json()
-                print(data)
+                # print(data)
 
-        async with self.bot.session.get(BASE_URL.format(region) + MATCH_API.format(data.get("accountId"), self.league_key)) as resp:
+        async with self.bot.session.get(BASE_URL.format(region) + MATCHES_API.format(data.get("accountId"), self.league_key)) as resp:
             rankData = await resp.json()
-            pprint.pprint(rankData)
+            # pprint.pprint(rankData)
+
+        matchId = rankData.get("matches")[0].get("gameId")
+        async with self.bot.session.get(BASE_URL.format(region) + MATCH_API.format(matchId, self.league_key)) as resp:
+            matchData = await resp.json()
+        pprint.pprint(matchData.get("participants"))
         await ctx.send("LM")
 
 
