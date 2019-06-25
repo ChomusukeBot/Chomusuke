@@ -3,6 +3,8 @@ import discord
 from discord.ext import commands
 import os
 import pprint
+import requests
+import json
 
 BASE_URL = "https://{}.api.riotgames.com"
 SUMMONER_API = "/lol/summoner/v4/summoners/by-name/{}?api_key={}"
@@ -28,10 +30,11 @@ class LeagueCog(commands.Cog):
         # Save our bot for later use
         self.bot = bot
         self.league_key = os.environ["LEAGUE_TOKEN"]
-        # self.league_ver =
+        self.league_ver = json.loads(requests.get("https://ddragon.leagueoflegends.com/api/versions.json").text)[0]
 
     @commands.command(name='lolprofile', aliases=["lp"])
     async def lolprofile(self, ctx, *args):
+        print(self.league_ver)
         if(args[0].lower() in REGIONS):
             region = REGIONS.get(args[0].lower())
         else:
@@ -41,11 +44,13 @@ class LeagueCog(commands.Cog):
         async with self.bot.session.get(BASE_URL.format(region) + SUMMONER_API.format('{}'.format(' '.join(args[1:])), self.league_key)) as resp:
             if(resp.status == 404):
                 await ctx.send("Summoner not found")
+                return
+
             data = await resp.json()
         pprint.pprint(data)
         embed = discord.Embed(title=data.get("name"))
         embed.set_author(name=("Summoner Level - " + str(data.get("summonerLevel"))))
-        embed.set_thumbnail(url="http://ddragon.leagueoflegends.com/cdn/9.12.1/img/profileicon/{}.png".format(data.get("profileIconId")))
+        embed.set_thumbnail(url="http://ddragon.leagueoflegends.com/cdn/{}/img/profileicon/{}.png".format(self.league_ver, data.get("profileIconId")))
 
         await ctx.send(embed=embed)
 
