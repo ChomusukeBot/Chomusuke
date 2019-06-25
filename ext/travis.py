@@ -31,6 +31,7 @@ class Travis(commands.Cog):
         """
 
     @travis.command()
+    @commands.dm_only()
     @commands.cooldown(1, 60, commands.BucketType.user)
     async def addtoken(self, ctx, token: str):
         """
