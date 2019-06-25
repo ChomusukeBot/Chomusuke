@@ -7,6 +7,21 @@ import pprint
 BASE_URL = "https://na1.api.riotgames.com"
 SUMMONER_API = "/lol/summoner/v4/summoners/by-name/{}?api_key={}"
 
+REGIONS = {
+    "br": "br1",
+    "eune": "eun1",
+    "euw": "euw1",
+    "jp": "jp1",
+    "kr": "kr",
+    "lan": "la1",
+    "las": "la2",
+    "na": "na1",
+    "oce": "oc1",
+    "tr": "tr1",
+    "ru": "ru",
+    "pbe": "pbe1"
+}
+
 
 class LeagueCog(commands.Cog):
     def __init__(self, bot):
