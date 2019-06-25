@@ -49,9 +49,6 @@ class LeagueCog(commands.Cog):
         embed = discord.Embed(title=data.get("name"))
         embed.set_author(name=("Summoner Level - " + str(data.get("summonerLevel"))))
         embed.set_thumbnail(url="http://ddragon.leagueoflegends.com/cdn/{}/img/profileicon/{}.png".format(self.league_ver, data.get("profileIconId")))
-        
-        accountId = data.get("id")
-        print(accountId)
 
         async with self.bot.session.get(BASE_URL.format(region) + RANKED_API.format(data.get("id"), self.league_key)) as resp:
             rankData = await resp.json()
