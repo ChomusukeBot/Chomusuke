@@ -29,7 +29,6 @@ class Travis(commands.Cog):
         """
         Group of commands for interacting with the Travis CI service.
         """
-        pass
 
     @travis.command()
     @commands.cooldown(1, 60, commands.BucketType.user)
