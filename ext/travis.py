@@ -4,6 +4,8 @@ from discord.ext import commands
 
 # This is our base URL for all API calls
 BASE = "https://api.travis-ci.com"
+# A list of available endpoints
+EP_USER = "/user"
 # Our default headers for all of the requests
 DEFAULT_HEADERS = {
     "Travis-API-Version": "3",
@@ -47,12 +49,28 @@ class Travis(commands.Cog):
             await self.tokens.replace_one({"_id": ctx.author.id}, {"token": token})
             # Notify the user
             await ctx.send("Your existing token has been replaced!")
-        # Otherwise
-        else:
-            # Add a completely new item
-            await self.tokens.insert_one({"_id": ctx.author.id, "token": token})
-            # Notify the user
-            await ctx.send("Your token has been added!")
+            # And return
+            return
+
+        # Create a copy of the default haders
+        headers = dict(DEFAULT_HEADERS)
+        # Set the token specified by the user
+        headers["Authorization"] = f"token {token}"
+
+        # Request the user data
+        async with self.bot.session.get(BASE + EP_USER, headers=headers) as resp:
+            # If the code is 403
+            if resp.status == 403:
+                await ctx.send("The token that has been specified is not valid.")
+            # If the code is 200
+            elif resp.status == 200:
+                # Add a completely new item
+                await self.tokens.insert_one({"_id": ctx.author.id, "token": token})
+                # Notify the user
+                await ctx.send("Your token has been added!")
+            # If the code is anything else
+            else:
+                await ctx.send(f"Error while checking for your token: Code {resp.status}")
 
         # If the user posted on a public text channel
         if isinstance(ctx.channel, discord.TextChannel):
