@@ -2,6 +2,7 @@
 import copy
 import discord
 from discord.ext import commands
+from exceptions import NoTokenSet
 
 # This is our base URL for all API calls
 BASE = "https://api.travis-ci.com"
@@ -29,6 +30,19 @@ class Travis(commands.Cog):
         self.bot = bot
         # Save the tokens collection
         self.tokens = bot.database["travis_tokens"]
+
+    async def get_token(self, _id: int):
+        """
+        Makes sure that a command is ready for the user.
+        """
+        # Get the user token
+        existing = await self.tokens.find_one({"_id": _id})
+        # If there is no token
+        if not existing:
+            raise NoTokenSet("A Travis CI.com token is required.")
+        # Otherwise
+        else:
+            return existing
 
     @commands.group()
     async def travis(self, ctx):
