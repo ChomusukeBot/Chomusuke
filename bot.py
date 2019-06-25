@@ -35,7 +35,7 @@ class Chomusuke(commands.AutoShardedBot):
         Adds a custom cog into the bot.
         """
         # If the cog is not our custom cog, raise an exception
-        if isinstance(cog, Cog):
+        if not isinstance(cog, Cog):
             raise TypeError("Chomusuke only accepts cogs that inherit from the custom class.")
 
         # Continue the workflow
