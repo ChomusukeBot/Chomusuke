@@ -7,6 +7,7 @@ import json
 
 BASE_URL = "https://{}.api.riotgames.com"
 SUMMONER_API = "/lol/summoner/v4/summoners/by-name/{}?api_key={}"
+RANKED_API = "/lol/league/v4/entries/by-summoner/{}?api_key={}"
 
 REGIONS = {
     "br": "br1",
@@ -48,6 +49,17 @@ class LeagueCog(commands.Cog):
         embed = discord.Embed(title=data.get("name"))
         embed.set_author(name=("Summoner Level - " + str(data.get("summonerLevel"))))
         embed.set_thumbnail(url="http://ddragon.leagueoflegends.com/cdn/{}/img/profileicon/{}.png".format(self.league_ver, data.get("profileIconId")))
+        
+        accountId = data.get("id")
+        print(accountId)
+
+        async with self.bot.session.get(BASE_URL.format(region) + RANKED_API.format(data.get("id"), self.league_key)) as resp:
+            rankData = await resp.json()
+            
+        rankData = rankData[0]
+        embed.add_field(name="Rank", value=("{} {}".format(rankData.get("tier"), rankData.get("rank"))), inline=True)
+        embed.add_field(name="Ranked W/L", value=("{}/{}".format(rankData.get("wins"), rankData.get("losses"))), inline=True)
+        embed.add_field(name="League Points", value=rankData.get("leaguePoints"), inline=True)
 
         await ctx.send(embed=embed)
 
