@@ -46,6 +46,19 @@ class Travis(commands.Cog):
         # Otherwise, return found key
         return existing
 
+    async def generate_headers(self, ctx):
+        """
+        Generates a set of headers for the use on aiohttp requests.
+        """
+        # Get the current user token
+        token = (await self.get_token(ctx.author.id))["token"]
+        # Create a copy of the default haders
+        headers = copy.deepcopy(DEFAULT_HEADERS)
+        # Set the token specified by the user
+        headers["Authorization"] = f"token {token}"
+        # Finally, return the headers
+        return headers
+
     @commands.group()
     async def travis(self, ctx):
         """
@@ -96,16 +109,9 @@ class Travis(commands.Cog):
         """
         # Send a typing
         await ctx.trigger_typing()
-        # Get the current user token
-        token = (await self.get_token(ctx.author.id))["token"]
-
-        # Create a copy of the default haders
-        headers = copy.deepcopy(DEFAULT_HEADERS)
-        # Set the token specified by the user
-        headers["Authorization"] = f"token {token}"
 
         # Request the list of user repos
-        async with self.bot.session.get(BASE + EP_REPOS, headers=headers) as resp:
+        async with self.bot.session.get(BASE + EP_REPOS, headers=self.generate_headers(ctx)) as resp:
             # If we didn't got a code 200, notify the user and return
             if resp.status != 200:
                 await ctx.send(f"Unable to get your list of repos: Code {resp.status}")
@@ -134,19 +140,11 @@ class Travis(commands.Cog):
         """
         # Send a typing
         await ctx.trigger_typing()
-
-        # Get the current user token
-        token = (await self.get_token(ctx.author.id))["token"]
         # Create a place to store the repository data
         desc = ""
 
-        # Create a copy of the default haders
-        headers = copy.deepcopy(DEFAULT_HEADERS)
-        # Set the token specified by the user
-        headers["Authorization"] = f"token {token}"
-
         # Request the list of user repos
-        async with self.bot.session.get(BASE + EP_REPOS, headers=headers) as resp:
+        async with self.bot.session.get(BASE + EP_REPOS, headers=self.generate_headers(ctx)) as resp:
             # If we didn't got a code 200, notify the user and return
             if resp.status != 200:
                 await ctx.send(f"Unable to get your list of repos: Code {resp.status}")
