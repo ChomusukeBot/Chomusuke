@@ -6,6 +6,8 @@ from exceptions import NoTokenSet
 
 # This is our base URL for all API calls
 BASE = "https://api.travis-ci.com"
+# The image for our embeds
+IMAGE = "https://travis-ci.com/images/logos/TravisCI-Mascot-1.png"
 # A list of available endpoints
 EP_USER = "/user"
 EP_REPOS = "/repos"
@@ -167,7 +169,7 @@ class Travis(commands.Cog):
         embed.color = OXIDE_BLUE
         embed.title = "{0}'s repositories on Travis CI".format(ctx.author.name)
         embed.description = desc
-        embed.set_thumbnail(url="https://travis-ci.com/images/logos/TravisCI-Mascot-1.png")
+        embed.set_thumbnail(url=IMAGE)
 
         # Finally, send the embed
         await ctx.send(embed=embed)
@@ -232,6 +234,7 @@ class Travis(commands.Cog):
         embed.color = OXIDE_BLUE
         embed.title = "Builds of {0}".format(repo)
         embed.url = f"https://travis-ci.com/{repo}"
+        embed.set_thumbnail(url=IMAGE)
         embed.description = ""
         # Iterate over the builds
         for build in json["builds"]:
