@@ -10,6 +10,7 @@ BASE = "https://api.travis-ci.com"
 EP_USER = "/user"
 EP_REPOS = "/repos"
 EP_REQUESTS = "/repo/{0}/requests"
+EP_BUILDS = "/repo/{0}/builds?limit=10"
 # Travis CI brand colors (https://travis-ci.com/logo)
 OXIDE_BLUE = 0x3EAAAF
 TURF_GREEN = 0x39AA56
@@ -201,6 +202,44 @@ class Travis(commands.Cog):
 
         # After we have the commit created, return the URL of the build
         await ctx.send(f"A Build has been triggered!\nYou can find your Build at https://travis-ci.com/{repo}/builds.")
+
+    @travis.command()
+    async def builds(self, ctx, slug: str = None):
+        """
+        Lists the builds on a specific Travis CI repo.
+        """
+        # Send a typing
+        await ctx.trigger_typing()
+
+        # Use either the specified repo or the slug
+        repo = slug or (await self.picks.find_one({"_id": ctx.author.id}))["slug"]
+        # If there is no repo, notify and return
+        if not repo:
+            await ctx.send("You need to specify a repo either via parameters or commands.")
+            return
+
+        # Request the list of builds for that repository
+        async with self.bot.session.get(BASE + EP_BUILDS.format(repo.replace("/", "%2F")), headers=await self.generate_headers(ctx)) as resp:
+            # If we didn't got a code 200, notify the user and return
+            if resp.status != 200:
+                await ctx.send(f"We were unable to get the list of builds: Code {resp.status}")
+                return
+            # Generate the JSON
+            json = await resp.json()
+
+        # Create an embed and configure the basics
+        embed = discord.Embed()
+        embed.color = OXIDE_BLUE
+        embed.title = "Builds of {0}".format(repo)
+        embed.url = f"https://travis-ci.com/{repo}"
+        embed.description = ""
+        # Iterate over the builds
+        for build in json["builds"]:
+            embed.description += "#[{0}]({1}) ({2})\n".format(build["number"], "https://travis-ci.com/{0}/builds/{1}".format(repo, build["id"]),
+                                                              build["previous_state"])
+
+        # Finally, send the embed with the builds
+        await ctx.send(embed=embed)
 
 
 def setup(bot):
