@@ -41,9 +41,8 @@ class Travis(commands.Cog):
         # If there is no token
         if not existing:
             raise NoTokenSet("A Travis CI.com token is required.")
-        # Otherwise
-        else:
-            return existing
+        # Otherwise, return found key
+        return existing
 
     @commands.group()
     async def travis(self, ctx):
