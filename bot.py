@@ -1,5 +1,6 @@
 # Start by loading the important stuff
 import aiohttp
+from cog import Cog
 from discord.ext import commands
 from motor.motor_asyncio import AsyncIOMotorClient
 
@@ -28,3 +29,14 @@ class Chomusuke(commands.AutoShardedBot):
 
         # Create a Client Session for using REST APIs
         self.session = aiohttp.ClientSession(loop=self.loop)
+
+    def add_cog(self, cog):
+        """
+        Adds a custom cog into the bot.
+        """
+        # If the cog is not our custom cog, raise an exception
+        if not isinstance(cog, Cog):
+            raise TypeError("Chomusuke only accepts cogs that inherit from the custom class.")
+
+        # Continue the workflow
+        super().add_cog(cog)
