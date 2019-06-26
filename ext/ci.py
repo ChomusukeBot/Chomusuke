@@ -211,7 +211,7 @@ class ContinuousIntegration(Cog):
         }
 
         # Get all of the parameters of the endpoint URL
-        params = [x[1] for x in string.Formatter().parse("{0}, {1}") if x[1] is not None]
+        params = [x[1] for x in string.Formatter().parse(self.endpoints["trigger"]) if x[1] is not None]
 
         # If there are parameters to format, do it with the URL
         if params:
