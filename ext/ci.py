@@ -48,7 +48,7 @@ class ContinuousIntegration(Cog):
         self.picks.delete_many({"_id": ctx.author.id})
         return True
 
-    async def generate_headers(self, ctx, auth_name: str):
+    async def generate_headers(self, ctx):
         """
         Generates a set of headers for the use on aiohttp requests.
         """
@@ -57,7 +57,7 @@ class ContinuousIntegration(Cog):
         # Create a copy of the default haders
         headers = copy.deepcopy(self.headers)
         # Set the token specified by the user
-        headers["Authorization"] = f"{auth_name} {token}"
+        headers["Authorization"] = f"{self.auth} {token}"
         # Finally, return the headers
         return headers
 
@@ -72,6 +72,12 @@ class ContinuousIntegration(Cog):
             raise NoTokenSet("A Travis CI.com token is required.")
         # Otherwise, return found key
         return existing
+
+    async def format_repos(self, json: dict):
+        """
+        Formats the JSON returned by the API to a neutral format.
+        """
+        raise NotImplementedError()
 
     @commands.command()
     async def addtoken(self, ctx, token: str):
@@ -106,6 +112,38 @@ class ContinuousIntegration(Cog):
         if isinstance(ctx.channel, discord.TextChannel):
             # Delete the original message
             await ctx.message.delete()
+
+    @commands.command()
+    async def pick(self, ctx, slug: str):
+        """
+        Chooses a repo with the specified slug for future operations.
+        """
+        # Create a list of headers
+        headers = await self.generate_headers(ctx)
+
+        # Request the list of user repos
+        async with self.bot.session.get(self.endpoints["repos"], headers=headers) as resp:
+            # If we didn't got a code 200, notify the user and return
+            if resp.status != 200:
+                await ctx.send(f"Unable to get your list of repos: Code {resp.status}")
+                return
+            # Parse the response as JSON
+            json = await resp.json()
+
+        # Format the repos returned by the response
+        output = await self.format_repos(json)
+        # Filter the picks
+        picks = {k: v for k, v in output.items() if slug.casefold() == k.casefold()}
+
+        # If there was no matches
+        if not picks:
+            await ctx.send("We were unable to find a repo with that slug.")
+            return
+
+        # Update an item and create it if is not present
+        await self.picks.replace_one({"_id": ctx.author.id}, {"_id": ctx.author.id, "slug": list(picks.keys())[0]}, True)
+        # Finally notify the user
+        await ctx.send("You have choosen {0} for your next operations.".format(list(picks.keys())[0]))
 
 
 def setup(bot):

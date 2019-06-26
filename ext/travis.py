@@ -13,7 +13,8 @@ EP_REQUESTS = "/repo/{0}/requests"
 EP_BUILDS = "/repo/{0}/builds?limit=10"
 # The list of endpoints that we are going to use
 ENDPOINTS = {
-    "validity": "https://api.travis-ci.com/user"
+    "validity": "https://api.travis-ci.com/user",
+    "repos": "https://api.travis-ci.com/repos"
 }
 # Travis CI brand colors (https://travis-ci.com/logo)
 OXIDE_BLUE = 0x3EAAAF
@@ -37,78 +38,26 @@ class Travis(ContinuousIntegration):
         super().__init__(*args, **kwargs)
         # Add the commands to our group
         self.travis.add_command(self.addtoken)
+        self.travis.add_command(self.pick)
+
+    async def format_repos(self, json: dict):
+        """
+        Formats the JSON response from a native Travis CI response to a simple dict.
+        """
+        # Create an output dictionary
+        output = {}
+        # Iterate over the repos
+        for repo in json["repositories"]:
+            # Save the slug and default branch
+            output[repo["slug"]] = repo["default_branch"]["name"]
+        # Finally, return the output dictionary
+        return output
 
     @commands.group()
     async def travis(self, ctx):
         """
         Group of commands for interacting with the Travis CI service.
         """
-
-    @travis.command()
-    async def pick(self, ctx, slug: str):
-        """
-        Chooses a repo with the specified slug for future operations.
-        """
-        # Create a list of headers
-        headers = await self.generate_headers(ctx, HEADERS, "token")
-
-        # Request the list of user repos
-        async with self.bot.session.get(BASE + EP_REPOS, headers=headers) as resp:
-            # If we didn't got a code 200, notify the user and return
-            if resp.status != 200:
-                await ctx.send(f"Unable to get your list of repos: Code {resp.status}")
-                return
-
-            # Parse the response as JSON
-            json = await resp.json()
-
-        # Store the picks
-        picks = [x for x in json["repositories"] if slug.casefold() == x["slug"].casefold()]
-
-        # If there was no matches
-        if not picks:
-            await ctx.send("We were unable to find a repo with that slug.")
-            return
-
-        # Update an item and create it if is not present
-        await self.picks.replace_one({"_id": ctx.author.id}, {"_id": ctx.author.id, "slug": picks[0]["slug"]}, True)
-        # Finally notify the user
-        await ctx.send("You have choosen {0} for your next operations.".format(picks[0]["slug"]))
-
-    @travis.command()
-    async def repos(self, ctx):
-        """
-        Lists all of the repositories that the User has access to.
-        """
-        # Send a typing
-        await ctx.trigger_typing()
-        # Create a place to store the repository data
-        desc = ""
-
-        # Request the list of user repos
-        async with self.bot.session.get(BASE + EP_REPOS, headers=await self.generate_headers(ctx)) as resp:
-            # If we didn't got a code 200, notify the user and return
-            if resp.status != 200:
-                await ctx.send(f"Unable to get your list of repos: Code {resp.status}")
-                return
-
-            # Parse the response as JSON
-            json = await resp.json()
-
-        # Iterate over the list of repos
-        for repo in [x for x in json["repositories"] if x["active"] and not x["private"]]:
-            # And add the repo information
-            desc += "{0} ({1})\n".format(repo["slug"], repo["default_branch"]["name"])
-
-        # Create an embed
-        embed = discord.Embed()
-        embed.color = OXIDE_BLUE
-        embed.title = "{0}'s repositories on Travis CI".format(ctx.author.name)
-        embed.description = desc
-        embed.set_thumbnail(url=IMAGE)
-
-        # Finally, send the embed
-        await ctx.send(embed=embed)
 
     @travis.command()
     async def trigger(self, ctx):
