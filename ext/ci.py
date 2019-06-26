@@ -259,6 +259,7 @@ class ContinuousIntegration(Cog):
         embed.url = self.endpoints["u_repo"].format(repo)
         embed.color = OXIDE_BLUE
         embed.description = ""
+        embed.set_thumbnail(url=self.endpoints["image"])
         # Iterate over the list of builds
         for key, item in (await self.format_builds(json)).items():
             # And add the build information
