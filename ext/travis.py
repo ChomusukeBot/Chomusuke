@@ -1,17 +1,20 @@
 # Import the commands extension
-import copy
 import discord
 from discord.ext import commands
 from ext.ci import ContinuousIntegration
+
 # This is our base URL for all API calls
 BASE = "https://api.travis-ci.com"
 # The image for our embeds
 IMAGE = "https://travis-ci.com/images/logos/TravisCI-Mascot-1.png"
 # A list of available endpoints
-EP_USER = "/user"
 EP_REPOS = "/repos"
 EP_REQUESTS = "/repo/{0}/requests"
 EP_BUILDS = "/repo/{0}/builds?limit=10"
+# The list of endpoints that we are going to use
+ENDPOINTS = {
+    "validity": "https://api.travis-ci.com/user"
+}
 # Travis CI brand colors (https://travis-ci.com/logo)
 OXIDE_BLUE = 0x3EAAAF
 TURF_GREEN = 0x39AA56
@@ -19,7 +22,7 @@ CANARY_YELLOW = 0xEDDE3F
 BRICK_RED = 0xDB4545
 ASPHALT_GREY = 0x666666
 # Our default headers for all of the requests
-DEFAULT_HEADERS = {
+HEADERS = {
     "Travis-API-Version": "3",
     "User-Agent": "Chomusuke (+https://github.com/justalemon/Chomusuke)"
 }
@@ -29,6 +32,12 @@ class Travis(ContinuousIntegration):
     """
     A cog for accessing the Travis CI API.
     """
+    def __init__(self, *args, **kwargs):
+        # Call the normal function
+        super().__init__(*args, **kwargs)
+        # Add the commands to our group
+        self.travis.add_command(self.addtoken)
+
     @commands.group()
     async def travis(self, ctx):
         """
@@ -36,52 +45,12 @@ class Travis(ContinuousIntegration):
         """
 
     @travis.command()
-    @commands.dm_only()
-    @commands.cooldown(1, 60, commands.BucketType.user)
-    async def addtoken(self, ctx, token: str):
-        """
-        Adds a Travis CI token to your Discord User.
-
-        To get a token:
-        * Install the Travis Command Line from https://github.com/travis-ci/travis.rb#installation
-        * Log into the command line (run "travis login --pro")
-        * Generate a token (run "travis token --pro")
-        """
-        # Send a typing
-        await ctx.trigger_typing()
-
-        # Create a copy of the default haders
-        headers = copy.deepcopy(DEFAULT_HEADERS)
-        # Set the token specified by the user
-        headers["Authorization"] = f"token {token}"
-
-        # Request the user data
-        async with self.bot.session.get(BASE + EP_USER, headers=headers) as resp:
-            # If the code is 403
-            if resp.status == 403:
-                await ctx.send("The token that has been specified is not valid.")
-            # If the code is 200
-            elif resp.status == 200:
-                # Update an item and create it if is not present
-                await self.tokens.replace_one({"_id": ctx.author.id}, {"_id": ctx.author.id, "token": token}, True)
-                # Notify the user
-                await ctx.send("Your token has been updated!")
-            # If the code is anything else
-            else:
-                await ctx.send(f"Error while checking for your token: Code {resp.status}")
-
-        # If the user posted on a public text channel
-        if isinstance(ctx.channel, discord.TextChannel):
-            # Delete the original message
-            await ctx.message.delete()
-
-    @travis.command()
     async def pick(self, ctx, slug: str):
         """
         Chooses a repo with the specified slug for future operations.
         """
         # Create a list of headers
-        headers = await self.generate_headers(ctx, DEFAULT_HEADERS, "token")
+        headers = await self.generate_headers(ctx, HEADERS, "token")
 
         # Request the list of user repos
         async with self.bot.session.get(BASE + EP_REPOS, headers=headers) as resp:
@@ -207,4 +176,4 @@ def setup(bot):
     """
     Our function called to add the cog to our bot.
     """
-    bot.add_cog(Travis(bot, "travis"))
+    bot.add_cog(Travis(bot, "travis", "token", HEADERS, ENDPOINTS))
