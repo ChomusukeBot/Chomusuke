@@ -1,6 +1,7 @@
 # Import our libraries
 import copy
 import discord
+import itertools
 import string
 from cog import Cog
 from discord.ext import commands
@@ -267,7 +268,7 @@ class ContinuousIntegration(Cog):
         embed.description = ""
         embed.set_thumbnail(url=self.endpoints["image"])
         # Iterate over the list of builds
-        for key, item in (await self.format_builds(json, repo)).items()[0:10]:
+        for key, item in itertools.islice((await self.format_builds(json, repo)).items(), 10):
             # And add the build information
             embed.description += "#[{0}]({1}) ({2})\n".format(key, self.endpoints["u_build"].format(repo, item["id"]), item["state"])
 
