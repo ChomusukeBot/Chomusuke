@@ -87,6 +87,12 @@ class ContinuousIntegration(Cog):
         """
         raise NotImplementedError()
 
+    async def format_builds(self, json: dict, slug: str):
+        """
+        Formats the JSON returned by the API to a neutral format.
+        """
+        raise NotImplementedError()
+
     @commands.command()
     async def addtoken(self, ctx, token: str):
         """
