@@ -210,7 +210,7 @@ class LeagueCog(Cog):
         for player in (matchData.get("participants")):
             playerDict = {
                 "champion": str(player.get("championId")),
-                "participantId": str(player.get("participantId")),
+                "participantId": player.get("participantId"),
                 "assists": str(player.get("stats").get("assists")),
                 "deaths": str(player.get("stats").get("deaths")),
                 "kills": str(player.get("stats").get("kills")),
@@ -220,7 +220,11 @@ class LeagueCog(Cog):
             }
             matchPlayers.append(playerDict)
         gameinfo = "GAME MODE: {}".format(gameMode)
-        # pprint.pprint(matchData)
+        for player in matchPlayers:
+            for participant in matchData.get("participantIdentities"):
+                if(player.get("participantId") == participant.get("participantId")):
+                    player["summonerName"] = participant.get("player").get("summonerName")
+        pprint.pprint(matchPlayers)
         await ctx.send(gameinfo)
 
 
