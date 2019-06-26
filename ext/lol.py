@@ -9,14 +9,17 @@ import pprint
 
 # Base URL for all API calls
 BASE_URL = "https://{}.api.riotgames.com"
-# League of Legends Statit Data for profile pictures
+# League of Legends Static Data for profile pictures
 PROFILE_IMAGE_URL = "http://ddragon.leagueoflegends.com/cdn/{}/img/profileicon/{}.png"
+# League of Legends Static Data for champions
+CHAMPIONS_URL = "http://ddragon.leagueoflegends.com/cdn/{}/data/en_US/champion.json"
 # API Operation used to access summoner data
 SUMMONER_API = "/lol/summoner/v4/summoners/by-name/{}?api_key={}"
 # API Operation used to access summoner ranked data
 RANKED_API = "/lol/league/v4/entries/by-summoner/{}?api_key={}"
-# API Operation used to access summoner matchlist
+# API Operation used to access summoner match history
 MATCHES_API = "/lol/match/v4/matchlists/by-account/{}?api_key={}"
+# API Operation used to access a specific match
 MATCH_API = "/lol/match/v4/matches/{}?api_key={}"
 # A .json file storing the current and all previous versions of league of legends
 LEAGUE_VERSION = "https://ddragon.leagueoflegends.com/api/versions.json"
@@ -81,18 +84,19 @@ class LeagueCog(Cog):
             await ctx.send("Region not found. Use one of the following: \nBR, EUNE, EUW, JP, KR, LAN, LAS, NA, OCE, TR, RU, PBE")
             return
         summoner = '{}'.format(' '.join(args[1:]))
+        # Request summoner data
         data = await self.getSummonerData(self, region, summoner)
         if not data:
             await ctx.send("Summoner not found")
             return
-
+        # Create an embed to display summoner data
         embed = discord.Embed(title=data.get("name"))
         embed.set_author(name=("Summoner Level - " + str(data.get("summonerLevel"))))
         embed.set_thumbnail(url=PROFILE_IMAGE_URL.format(self.league_ver, data.get("profileIconId")))
         # Request the summoner ranked data
         summonerId = data.get("id")
         rankData = await self.getSummonerRankedData(self, region, summonerId)
-
+        # Check if ranked data exists, otherwise Unranked
         if rankData:
             rankData = rankData[0]
             embed.add_field(name="Rank", value=("{} {}".format(rankData.get("tier"), rankData.get("rank"))), inline=True)
@@ -123,7 +127,22 @@ class LeagueCog(Cog):
         matchId = matchHistory.get("matches")[0].get("gameId")
         # request match information
         matchData = await self.getMatchInformation(self, region, matchId)
-        pprint.pprint(matchData.get("participants"))
+        gameMode = matchData.get("gameMode")
+        matchPlayers = []
+        for player in (matchData.get("participants")):
+            playerDict = {
+                "champion": str(player.get("championId")),
+                "participantId": str(player.get("participantId")),
+                "assists": str(player.get("stats").get("assists")),
+                "deaths": str(player.get("stats").get("deaths")),
+                "kills": str(player.get("stats").get("kills")),
+                "team": str(player.get("teamId")),
+                "lane": str(player.get("timeline").get("lane")),
+                "role": str(player.get("timeline").get("role"))
+            }
+            matchPlayers.append(playerDict)
+        print("GAME MODE: " + gameMode)
+        pprint.pprint(matchPlayers)
         await ctx.send("LM")
 
 
