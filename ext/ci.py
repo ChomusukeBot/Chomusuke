@@ -225,8 +225,8 @@ class ContinuousIntegration(Cog):
         # Request the list of user repos
         async with self.bot.session.post(url, data=data,
                                          headers=await self.generate_headers(ctx)) as resp:
-            # If we didn't got a code 202, notify the user and return
-            if resp.status != 202:
+            # If we didn't got a code 202 or 200, notify the user and return
+            if resp.status != 202 and resp.status != 202:
                 await ctx.send(f"We were unable to start a build: Code {resp.status}")
                 return
 
