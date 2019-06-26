@@ -3,6 +3,7 @@ import discord
 from discord.ext import commands
 import os
 import requests
+from cog import Cog
 import json
 import pprint
 
@@ -36,7 +37,7 @@ REGIONS = {
 }
 
 
-class LeagueCog(commands.Cog):
+class LeagueCog(Cog):
     """
     A cog for accessing the League of Legends API.
     """
