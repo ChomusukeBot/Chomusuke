@@ -1,10 +1,8 @@
 # Import the commands extension
 import copy
 import discord
-from cog import Cog
 from discord.ext import commands
-from exceptions import NoTokenSet
-
+from ext.ci import ContinuousIntegration
 # This is our base URL for all API calls
 BASE = "https://api.travis-ci.com"
 # The image for our embeds
@@ -27,69 +25,10 @@ DEFAULT_HEADERS = {
 }
 
 
-class Travis(Cog):
+class Travis(ContinuousIntegration):
     """
     A cog for accessing the Travis CI API.
     """
-    def __init__(self, bot):
-        # Save our bot for later use
-        self.bot = bot
-        # Save the collections
-        self.tokens = bot.database["travis_tokens"]
-        self.picks = bot.database["travis_picks"]
-
-    async def dump_data(self, ctx):
-        """
-        Returns the Travis related data.
-        """
-        # Get the token of the user and stored pick
-        token = await self.tokens.find_one({"_id": ctx.author.id})
-        pick = await self.picks.find_one({"_id": ctx.author.id})
-        # Create a place to store the dict
-        data = {}
-        # If there is a token found, add it into the group
-        if token:
-            data["token"] = token["token"]
-        # If there is a pick found, add it into the group
-        if pick:
-            data["pick"] = pick["slug"]
-        # Finally, return the data
-        return data
-
-    async def forget_data(self, ctx):
-        """
-        Removes the user data from the Travis collections.
-        """
-        # Just delete those with the id of the user
-        self.tokens.delete_many({"_id": ctx.author.id})
-        self.picks.delete_many({"_id": ctx.author.id})
-        return True
-
-    async def get_token(self, _id: int):
-        """
-        Makes sure that a command is ready for the user.
-        """
-        # Get the user token
-        existing = await self.tokens.find_one({"_id": _id})
-        # If there is no token
-        if not existing:
-            raise NoTokenSet("A Travis CI.com token is required.")
-        # Otherwise, return found key
-        return existing
-
-    async def generate_headers(self, ctx):
-        """
-        Generates a set of headers for the use on aiohttp requests.
-        """
-        # Get the current user token
-        token = (await self.get_token(ctx.author.id))["token"]
-        # Create a copy of the default haders
-        headers = copy.deepcopy(DEFAULT_HEADERS)
-        # Set the token specified by the user
-        headers["Authorization"] = f"token {token}"
-        # Finally, return the headers
-        return headers
-
     @commands.group()
     async def travis(self, ctx):
         """
@@ -141,11 +80,11 @@ class Travis(Cog):
         """
         Chooses a repo with the specified slug for future operations.
         """
-        # Send a typing
-        await ctx.trigger_typing()
+        # Create a list of headers
+        headers = await self.generate_headers(ctx, DEFAULT_HEADERS, "token")
 
         # Request the list of user repos
-        async with self.bot.session.get(BASE + EP_REPOS, headers=await self.generate_headers(ctx)) as resp:
+        async with self.bot.session.get(BASE + EP_REPOS, headers=headers) as resp:
             # If we didn't got a code 200, notify the user and return
             if resp.status != 200:
                 await ctx.send(f"Unable to get your list of repos: Code {resp.status}")
@@ -268,4 +207,4 @@ def setup(bot):
     """
     Our function called to add the cog to our bot.
     """
-    bot.add_cog(Travis(bot))
+    bot.add_cog(Travis(bot, "travis"))
