@@ -236,7 +236,7 @@ class ContinuousIntegration(Cog):
     @commands.command()
     async def builds(self, ctx, slug: str = None):
         """
-        Lists the builds on a specific Travis CI repo.
+        Lists the last 10 builds on a specific repo.
         """
         # Use either the specified repo or the slug
         repo = (await self.picks.find_one({"_id": ctx.author.id}))["slug"]
@@ -265,7 +265,7 @@ class ContinuousIntegration(Cog):
 
         # Create an embed and configure the basics
         embed = discord.Embed()
-        embed.title = "Builds of {0}".format(repo)
+        embed.title = "Last 10 builds of {0}".format(repo)
         embed.url = self.endpoints["u_repo"].format(repo)
         embed.color = OXIDE_BLUE
         embed.description = ""
