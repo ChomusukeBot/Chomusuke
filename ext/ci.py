@@ -283,4 +283,3 @@ def setup(bot):
     """
     Our function called to add the cog to our bot.
     """
-    pass
