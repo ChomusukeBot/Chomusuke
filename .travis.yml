@@ -4,10 +4,8 @@ dist: xenial
 # Set the language to Python
 language: python
 
-# Do the testing on Python 3.6 and 3.7
-# Minimum version supported and latest stable respectively
+# Do the testing on Python 3.7
 python:
-  - 3.6
   - 3.7
 
 # Install the requirements during the install phase
