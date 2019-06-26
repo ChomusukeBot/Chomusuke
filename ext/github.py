@@ -20,19 +20,19 @@ class GithubIntegration(Cog):
 
     async def fetch(self, session, url, params={}):
         headers = {
-            'Content-Type':'application/json',
-            'Accept': 'application/json'
+            "Content-Type":"application/json",
+            "Accept": "application/json"
         }
-        auth = aiohttp.BasicAuth(os.environ.get('AUTH_EMAIL'), os.environ.get('AUTH_PASS'))
+        auth = aiohttp.BasicAuth(os.environ.get("AUTH_EMAIL"), os.environ.get("AUTH_PASS"))
         session.auth = auth
         async with session.get(url=url, headers=headers, params=params) as response:
             return await response.json()
 
-    @commands.group(name='github', invoke_without_command=True)
+    @commands.group(name="github", invoke_without_command=True)
     async def github(self, ctx):
         """A set of commands to get information from github."""
 
-    @github.command(name='repo', aliases=['r'])
+    @github.command(name="repo", aliases=["r"])
     async def get_repository_information(self, ctx, repo_name: str, author: str = None):
         """
             A command to get information about a repository.
@@ -47,23 +47,23 @@ class GithubIntegration(Cog):
         if author is None:
             embed = await self.search_repos(repo_name, 1)
         else:
-            url = f'https://api.github.com/repos/{author}/{repo_name}'
+            url = f"https://api.github.com/repos/{author}/{repo_name}"
             data = await self.fetch(session, url)
-            if data['message']:
+            if data["message"]:
                 return await ctx.send("Invalid Repository name or owner name!")
             embed.title = f"Name : {data['name']}"
             embed.description = f"**:star:{data['stargazers_count']}/:fork_and_knife:{data['forks']}\n\n"
             embed.description += f"**Owner:** {data['owner']['login']}\n"
             embed.description += f"**Description:** {data['description'][0:50]}\n"
-            if len(data['description']) > 50:
+            if len(data["description"]) > 50:
                 embed.description += '...'
             else:
                 pass
-            embed.url = data['html_url']
+            embed.url = data["html_url"]
         
         await ctx.send(embed=embed)
         
-    @github.command(name='search', aliases=['s'])
+    @github.command(name="search", aliases=["s"])
     async def search_repository(self, ctx, repo_name: str):
         """
         This command will get the top 5 repositories sorted by stars.
@@ -75,19 +75,19 @@ class GithubIntegration(Cog):
         
     async def search_repos(self, repo_name, no_of_repos: int):
         embed = discord.Embed(colour = discord.Colour.blue())
-        url = 'https://api.github.com/search/repositories'
+        url = "https://api.github.com/search/repositories"
         params = {
-            'q': repo_name,
-            'sort': 'stars'  
+            "q": repo_name,
+            "sort": "stars"
         }
         session = self.bot.http_session
         data = await self.fetch(session, url, params)
-        if data['total_count'] == 0:
-            embed.title = 'Repository not found!'
+        if data["total_count"] == 0:
+            embed.title = "Repository not found!"
             return embed
         embed.url = f"https://github.com/search?q={repo_name}"
         i = 0
-        for x in data['items']:
+        for x in data["items"]:
             if no_of_repos == 5:
                 # For search command.
                 embed.title = f"Search results for {repo_name}"
@@ -96,12 +96,12 @@ class GithubIntegration(Cog):
                 # For get repository command.
                 embed.title = f"Name: {repo_name}"
                 field_name = f"Owner: {x['owner']['login']}"
-                embed.url = x['html_url']
+                embed.url = x["html_url"]
             i+=1
-            if x['description'] is None:
-                message = 'No description avilable.'
+            if x["description"] is None:
+                message = "No description avilable."
             else:
-                message = x['description'][0:50]
+                message = x["description"][0:50]
 
             value_field = f"**:star:{x['stargazers_count']}/:fork_and_knife:{x['forks']}\nDescription :** {message}...\nLink : {x['html_url']}\n"
             if no_of_repos != 1:
@@ -118,7 +118,7 @@ class GithubIntegration(Cog):
                 break
         return embed
 
-    @github.command(name='issue', aliases=['i'])
+    @github.command(name="issue", aliases=["i"])
     async def get_issues(self, ctx, owner: str, repo: str, issue_id: int):
         """
         A command to get complete information about an issue.
@@ -127,37 +127,37 @@ class GithubIntegration(Cog):
         
         """
         session = self.bot.http_session
-        url = f'https://api.github.com/repos/{owner}/{repo}/issues/{issue_id}'
+        url = f"https://api.github.com/repos/{owner}/{repo}/issues/{issue_id}"
         data = await self.fetch(session, url)
-        if data['message']:
+        if data["message"]:
                 return await ctx.send("Invalid Repository name or owner name or issue number!")
         embed = discord.Embed(colour=discord.Colour.blue())
-        embed.title = data['title']
-        embed.url = data['html_url']
-        embed.description = data['body']
+        embed.title = data["title"]
+        embed.url = data["html_url"]
+        embed.description = data["body"]
 
-        if data['assignee'] is not None:
+        if data["assignee"] is not None:
             # If no one is assigned to the issue.
-            msg = data['assignee']['login']
+            msg = data["assignee"]["login"]
         else:
-            msg = 'None'
+            msg = "None"
         embed.set_footer(text=f"Issue opened by {data['user']['login']} and is assigned to {msg}")
 
         if len(embed) > 2000:
             # Checking if the embed exceeds 2000 chars to avoid BAD REQUEST.
-            embed.description = data['body'][0:1900] + '...'
+            embed.description = data["body"][0:1900] + "..."
         await ctx.send(embed=embed)
 
-    @commands.group(name='labels', aliases=['label', 'l'], invoke_without_command=True)
+    @commands.group(name="labels", aliases=["label", "l"], invoke_without_command=True)
     async def get_labels(self, ctx, owner: str, repo: str):
         """A command to get all the labels in a repository."""
         session = self.bot.http_session
-        url = f'https://api.github.com/repos/{owner}/{repo}/labels'
+        url = f"https://api.github.com/repos/{owner}/{repo}/labels"
         data = await self.fetch(session, url)
         label_len = len(data)
         embed = discord.Embed(colour=discord.Colour.blue())
-        embed.title = 'Labels'
-        embed.description = ''
+        embed.title = "Labels"
+        embed.description = ""
         for i, label in enumerate(data, start=1):
             embed.description += f"{i}. **{label['name']}**\n"
         await ctx.send(embed=embed)
