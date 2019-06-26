@@ -204,6 +204,7 @@ class LeagueCog(Cog):
         # request match information
         matchData = await self.getMatchInformation(self, region, matchId)
         print(matchData.get("queueId"))
+        gameModeLeague = matchData.get("gameMode")
         gameMode = MATCHMAKING_QUEUES.get(matchData.get("queueId"))
         print(gameMode)
         matchPlayers = []
@@ -224,7 +225,7 @@ class LeagueCog(Cog):
             for participant in matchData.get("participantIdentities"):
                 if(player.get("participantId") == participant.get("participantId")):
                     player["summonerName"] = participant.get("player").get("summonerName")
-        pprint.pprint(matchPlayers)
+        pprint.pprint(gameModeLeague)
         await ctx.send(gameinfo)
 
 
