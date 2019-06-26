@@ -52,7 +52,7 @@ class GDPR(Cog):
     @commands.cooldown(1, 60 * 12, commands.BucketType.user)
     async def forget(self, ctx):
         """
-        Removes all of your data from the bot.
+        Removes all of your data from the bot, and then sends you the list of cogs that removed your data.
         """
         # Notify the user
         await ctx.author.send("Your data is being removed, please wait...")
