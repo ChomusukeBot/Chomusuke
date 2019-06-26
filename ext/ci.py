@@ -244,10 +244,13 @@ class ContinuousIntegration(Cog):
         # Get all of the parameters of the endpoint URL
         params = [x[1] for x in string.Formatter().parse("{0}, {1}") if x[1] is not None]
 
-        # If there are parameters to format, do it with the URL
-        if params:
+        # If there is only one parameter to format
+        if len(params) == 1:
             url = self.endpoints["builds"].format(repo.replace("/", "%2F"))
-        # Otherwise, is expecting data on the body
+        # If there are two parameters
+        elif len(params) == 2:
+            url = self.endpoints["builds"].format(*repo.split("/"))
+        # If there are no parameters
         else:
             url = self.endpoints["builds"]
 
