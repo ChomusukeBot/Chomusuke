@@ -56,7 +56,7 @@ class GithubIntegration(Cog):
             embed.description += f"**Owner:** {data['owner']['login']}\n"
             embed.description += f"**Description:** {data['description'][0:50]}\n"
             if len(data["description"]) > 50:
-                embed.description += '...'
+                embed.description += "..."
             else:
                 pass
             embed.url = data["html_url"]
@@ -106,7 +106,7 @@ class GithubIntegration(Cog):
             value_field = f"**:star:{x['stargazers_count']}/:fork_and_knife:{x['forks']}\nDescription :** {message}...\nLink : {x['html_url']}\n"
             if no_of_repos != 1:
                 if i != no_of_repos:
-                    value_field += '.'
+                    value_field += "."
                 else:
                     pass
             embed.add_field(
