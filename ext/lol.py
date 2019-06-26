@@ -6,6 +6,7 @@ import requests
 from cog import Cog
 import json
 import pprint
+from datetime import datetime, timedelta
 
 # Base URL for all API calls
 BASE_URL = "https://{}.api.riotgames.com"
@@ -148,6 +149,15 @@ class LeagueCog(Cog):
         async with self.bot.session.get(BASE_URL.format(region) + MATCH_API.format(matchId, self.league_key)) as resp:
             return await resp.json()
 
+    def secondsToText(ctx, secs):
+        days = secs//86400
+        hours = (secs - days*86400)//3600
+        minutes = (secs - days*86400 - hours*3600)//60
+        seconds = secs - days*86400 - hours*3600 - minutes*60
+        result = (("{} days, ".format(days) if days else "") + ("{}:".format(hours) if hours else "") 
+                  + ("{}".format(minutes) if minutes else "") + (":{} ".format(seconds) if seconds else ""))
+        return result
+
     @commands.command(name='lolprofile', aliases=["lp"])
     async def lolprofile(self, ctx, *args):
         """
@@ -201,12 +211,14 @@ class LeagueCog(Cog):
         # request the match history of the summoner
         matchHistory = await self.getSummonerMatchHistory(self, region, accountId)
         matchId = matchHistory.get("matches")[0].get("gameId")
+        matchTimeStamp = matchHistory.get("matches")[0].get("timestamp")
         # request match information
         matchData = await self.getMatchInformation(self, region, matchId)
         print(matchData.get("queueId"))
         gameModeLeague = matchData.get("gameMode")
         gameMode = MATCHMAKING_QUEUES.get(matchData.get("queueId"))
         print(gameMode)
+        gameDuration = matchData.get("gameDuration")
         matchPlayers = []
         for player in (matchData.get("participants")):
             playerDict = {
@@ -217,23 +229,22 @@ class LeagueCog(Cog):
                 "kills": str(player.get("stats").get("kills")),
                 "team": str(player.get("teamId")),
                 "lane": str(player.get("timeline").get("lane")),
-                "role": str(player.get("timeline").get("role"))
+                "role": str(player.get("timeline").get("role")),
+                "win": player.get("stats").get("win")
             }
             matchPlayers.append(playerDict)
-        gameinfo = "GAME MODE: {}".format(gameMode)
+        gameinfo = gameMode
         for player in matchPlayers:
             for participant in matchData.get("participantIdentities"):
                 if(player.get("participantId") == participant.get("participantId")):
                     player["summonerName"] = participant.get("player").get("summonerName")
-              
+        # Time
+        time = self.secondsToText(gameDuration)
         # split players into teams
         blueTeam = matchPlayers[:5]
         redTeam = matchPlayers[5:]
-        # who won the game?
-        pprint.pprint(blueTeam)
-        print("_______")
-        pprint.pprint(redTeam)
-        await ctx.send(gameinfo)
+        embed = discord.Embed(title=gameinfo, description=("Game time: " + time))
+        await ctx.send(embed=embed)
 
 
 def setup(bot):
