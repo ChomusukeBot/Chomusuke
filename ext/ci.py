@@ -1,6 +1,7 @@
 # Import our libraries
 import copy
 import discord
+import string
 from cog import Cog
 from discord.ext import commands
 from exceptions import NoTokenSet
@@ -202,8 +203,20 @@ class ContinuousIntegration(Cog):
             "message": f"Chomusuke: Triggered by {ctx.author.name} from Discord"
         }
 
+        # Get all of the parameters of the endpoint URL
+        params = [x[1] for x in string.Formatter().parse("{0}, {1}") if x[1] is not None]
+
+        # If there are parameters to format, do it with the URL
+        if params:
+            url = self.endpoints["trigger"].format(repo.replace("/", "%2F"))
+        # Otherwise, is expecting data on the body
+        else:
+            url = self.endpoints["trigger"]
+            data["accountName"] = repo.split("/")[0]
+            data["projectSlug"] = repo.split("/")[1]
+
         # Request the list of user repos
-        async with self.bot.session.post(self.endpoints["trigger"].format(repo.replace("/", "%2F")), data=data,
+        async with self.bot.session.post(url, data=data,
                                          headers=await self.generate_headers(ctx)) as resp:
             # If we didn't got a code 202, notify the user and return
             if resp.status != 202:
@@ -221,8 +234,18 @@ class ContinuousIntegration(Cog):
         # Use either the specified repo or the slug
         repo = (await self.picks.find_one({"_id": ctx.author.id}))["slug"]
 
+        # Get all of the parameters of the endpoint URL
+        params = [x[1] for x in string.Formatter().parse("{0}, {1}") if x[1] is not None]
+
+        # If there are parameters to format, do it with the URL
+        if params:
+            url = self.endpoints["builds"].format(repo.replace("/", "%2F"))
+        # Otherwise, is expecting data on the body
+        else:
+            url = self.endpoints["builds"]
+
         # Request the list of builds for that repository
-        async with self.bot.session.get(self.endpoints["builds"].format(repo.replace("/", "%2F")), headers=await self.generate_headers(ctx)) as resp:
+        async with self.bot.session.get(url, headers=await self.generate_headers(ctx)) as resp:
             # If we didn't got a code 200, notify the user and return
             if resp.status != 200:
                 await ctx.send(f"We were unable to get the list of builds: Code {resp.status}")
