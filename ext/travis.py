@@ -2,17 +2,14 @@
 from discord.ext import commands
 from ext.ci import ContinuousIntegration
 
-# This is our base URL for all API calls
-BASE = "https://api.travis-ci.com"
-# A list of available endpoints
-EP_REPOS = "/repos"
-EP_REQUESTS = "/repo/{0}/requests"
-EP_BUILDS = "/repo/{0}/builds?limit=10"
 # The list of endpoints that we are going to use
 ENDPOINTS = {
     "image": "https://travis-ci.com/images/logos/TravisCI-Mascot-1.png",
+    "u_builds": "https://travis-ci.com/{0}/builds",
     "validity": "https://api.travis-ci.com/user",
-    "repos": "https://api.travis-ci.com/repos"
+    "repos": "https://api.travis-ci.com/repos",
+    "trigger": "https://api.travis-ci.com/repo/{0}/requests",
+    "builds": "https://api.travis-ci.com/repo/{0}/builds?limit=10"
 }
 # Our default headers for all of the requests
 HEADERS = {
@@ -32,6 +29,7 @@ class Travis(ContinuousIntegration):
         self.travis.add_command(self.addtoken)
         self.travis.add_command(self.pick)
         self.travis.add_command(self.repos)
+        self.travis.add_command(self.trigger)
 
     async def format_repos(self, json: dict):
         """

@@ -187,6 +187,32 @@ class ContinuousIntegration(Cog):
         # Finally, send the embed
         await ctx.send(embed=embed)
 
+    @commands.command()
+    async def trigger(self, ctx):
+        """
+        Triggers a build for the specified repo.
+        """
+        # Send a typing
+        await ctx.trigger_typing()
+        # Use either the specified repo or the slug
+        repo = (await self.picks.find_one({"_id": ctx.author.id}))["slug"]
+
+        # Create the data or body
+        data = {
+            "message": f"Chomusuke: Triggered by {ctx.author.name} from Discord"
+        }
+
+        # Request the list of user repos
+        async with self.bot.session.post(self.endpoints["trigger"].format(repo.replace("/", "%2F")), data=data,
+                                         headers=await self.generate_headers(ctx)) as resp:
+            # If we didn't got a code 202, notify the user and return
+            if resp.status != 202:
+                await ctx.send(f"We were unable to start a build: Code {resp.status}")
+                return
+
+        # After we have the commit created, return the URL of the build
+        await ctx.send("A Build has been triggered!\nYou can find your Build at {0}.".format(self.endpoints["u_builds"].format(repo)))
+
 
 def setup(bot):
     """
