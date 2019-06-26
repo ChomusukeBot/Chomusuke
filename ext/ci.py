@@ -180,7 +180,7 @@ class ContinuousIntegration(Cog):
             json = await resp.json()
 
         # Iterate over the list of repos
-        for key, item in (await self.format_repos(json)):
+        for key, item in (await self.format_repos(json)).items():
             # And add the repo information
             desc += "{0} ({1})\n".format(key, item)
 
@@ -267,7 +267,7 @@ class ContinuousIntegration(Cog):
         embed.description = ""
         embed.set_thumbnail(url=self.endpoints["image"])
         # Iterate over the list of builds
-        for key, item in (await self.format_builds(json)).items():
+        for key, item in (await self.format_builds(json, repo)).items()[0:10]:
             # And add the build information
             embed.description += "#[{0}]({1}) ({2})\n".format(key, self.endpoints["u_build"].format(repo, item["id"]), item["state"])
 
