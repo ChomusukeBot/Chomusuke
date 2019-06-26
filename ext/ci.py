@@ -5,6 +5,13 @@ from cog import Cog
 from discord.ext import commands
 from exceptions import NoTokenSet
 
+# Set of colors that we are going to use
+OXIDE_BLUE = 0x3EAAAF  # Travis CI
+TURF_GREEN = 0x39AA56  # Travis CI
+CANARY_YELLOW = 0xEDDE3F  # Travis CI
+BRICK_RED = 0xDB4545  # Travis CI
+ASPHALT_GREY = 0x666666  # Travis CI
+
 
 class ContinuousIntegration(Cog):
     """
@@ -144,6 +151,41 @@ class ContinuousIntegration(Cog):
         await self.picks.replace_one({"_id": ctx.author.id}, {"_id": ctx.author.id, "slug": list(picks.keys())[0]}, True)
         # Finally notify the user
         await ctx.send("You have choosen {0} for your next operations.".format(list(picks.keys())[0]))
+
+    @commands.command()
+    async def repos(self, ctx):
+        """
+        Lists all of the repositories that you have access to.
+        """
+        # Send a typing
+        await ctx.trigger_typing()
+        # Create a place to store the repository data
+        desc = ""
+
+        # Request the list of user repos
+        async with self.bot.session.get(self.endpoints["repos"], headers=await self.generate_headers(ctx)) as resp:
+            # If we didn't got a code 200, notify the user and return
+            if resp.status != 200:
+                await ctx.send(f"Unable to get your list of repos: Code {resp.status}")
+                return
+
+            # Parse the response as JSON
+            json = await resp.json()
+
+        # Iterate over the list of repos
+        for key, item in (await self.format_repos(json)):
+            # And add the repo information
+            desc += "{0} ({1})\n".format(key, item)
+
+        # Create an embed
+        embed = discord.Embed()
+        embed.color = OXIDE_BLUE
+        embed.title = "{0}'s repositories".format(ctx.author.name)
+        embed.description = desc
+        embed.set_thumbnail(url=self.endpoints["image"])
+
+        # Finally, send the embed
+        await ctx.send(embed=embed)
 
 
 def setup(bot):
