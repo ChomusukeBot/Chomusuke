@@ -47,7 +47,7 @@ class Travis(ContinuousIntegration):
         # Finally, return the output dictionary
         return output
 
-    async def format_builds(self, json: dict):
+    async def format_builds(self, json: dict, slug: str):
         """
         Formats the JSON response from a native Travis CI response to a simple dict.
         """
