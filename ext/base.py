@@ -1,8 +1,8 @@
 # Import the commands extension
-from discord.ext import commands
+from cog import Cog
 
 
-class CustomCog(commands.Cog):
+class CustomCog(Cog):
     """
     The base class for our custom cog.
     """
