@@ -225,7 +225,14 @@ class LeagueCog(Cog):
             for participant in matchData.get("participantIdentities"):
                 if(player.get("participantId") == participant.get("participantId")):
                     player["summonerName"] = participant.get("player").get("summonerName")
-        pprint.pprint(gameModeLeague)
+              
+        # split players into teams
+        blueTeam = matchPlayers[:5]
+        redTeam = matchPlayers[5:]
+        # who won the game?
+        pprint.pprint(blueTeam)
+        print("_______")
+        pprint.pprint(redTeam)
         await ctx.send(gameinfo)
 
 
