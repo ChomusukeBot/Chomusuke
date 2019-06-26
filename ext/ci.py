@@ -213,6 +213,37 @@ class ContinuousIntegration(Cog):
         # After we have the commit created, return the URL of the build
         await ctx.send("A Build has been triggered!\nYou can find your Build at {0}.".format(self.endpoints["u_builds"].format(repo)))
 
+    @commands.command()
+    async def builds(self, ctx, slug: str = None):
+        """
+        Lists the builds on a specific Travis CI repo.
+        """
+        # Use either the specified repo or the slug
+        repo = (await self.picks.find_one({"_id": ctx.author.id}))["slug"]
+
+        # Request the list of builds for that repository
+        async with self.bot.session.get(self.endpoints["builds"].format(repo.replace("/", "%2F")), headers=await self.generate_headers(ctx)) as resp:
+            # If we didn't got a code 200, notify the user and return
+            if resp.status != 200:
+                await ctx.send(f"We were unable to get the list of builds: Code {resp.status}")
+                return
+            # Generate the JSON
+            json = await resp.json()
+
+        # Create an embed and configure the basics
+        embed = discord.Embed()
+        embed.title = "Builds of {0}".format(repo)
+        embed.url = self.endpoints["u_repo"].format(repo)
+        embed.color = OXIDE_BLUE
+        embed.description = ""
+        # Iterate over the list of builds
+        for key, item in (await self.format_builds(json)).items():
+            # And add the build information
+            embed.description += "#[{0}]({1}) ({2})\n".format(key, self.endpoints["u_build"].format(repo, item["id"]), item["state"])
+
+        # Finally, send the embed with the builds
+        await ctx.send(embed=embed)
+
 
 def setup(bot):
     """

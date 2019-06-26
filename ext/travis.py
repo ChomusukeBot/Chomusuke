@@ -5,6 +5,8 @@ from ext.ci import ContinuousIntegration
 # The list of endpoints that we are going to use
 ENDPOINTS = {
     "image": "https://travis-ci.com/images/logos/TravisCI-Mascot-1.png",
+    "u_repo": "https://travis-ci.com/{0}",
+    "u_build": "https://travis-ci.com/{0}/builds/{1}",
     "u_builds": "https://travis-ci.com/{0}/builds",
     "validity": "https://api.travis-ci.com/user",
     "repos": "https://api.travis-ci.com/repos",
@@ -30,6 +32,7 @@ class Travis(ContinuousIntegration):
         self.travis.add_command(self.pick)
         self.travis.add_command(self.repos)
         self.travis.add_command(self.trigger)
+        self.travis.add_command(self.builds)
 
     async def format_repos(self, json: dict):
         """
@@ -41,6 +44,19 @@ class Travis(ContinuousIntegration):
         for repo in json["repositories"]:
             # Save the slug and default branch
             output[repo["slug"]] = repo["default_branch"]["name"]
+        # Finally, return the output dictionary
+        return output
+
+    async def format_builds(self, json: dict):
+        """
+        Formats the JSON response from a native Travis CI response to a simple dict.
+        """
+        # Create an output dictionary
+        output = {}
+        # Iterate over the builds
+        for build in json["builds"]:
+            # Save the slug and default branch
+            output[build["number"]] = {"id": build["id"], "state": build["previous_state"]}
         # Finally, return the output dictionary
         return output
 
