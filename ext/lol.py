@@ -47,6 +47,27 @@ class LeagueCog(commands.Cog):
         self.league_key = os.environ["LEAGUE_TOKEN"]
         self.league_ver = json.loads(requests.get(LEAGUE_VERSION).text)[0]
 
+    async def getSummonerData(self, ctx, region, summoner):
+        async with self.bot.session.get(BASE_URL.format(region) + SUMMONER_API.format(summoner, self. league_key)) as resp:
+            # If the code is 404
+            if(resp.status == 404):
+                return
+            # If the code is 200
+            elif(resp.status == 200):
+                return await resp.json()
+
+    async def getSummonerRankedData(self, ctx, region, id):
+        async with self.bot.session.get(BASE_URL.format(region) + RANKED_API.format(id, self.league_key)) as resp:
+            return await resp.json()
+
+    async def getSummonerMatchHistory(self, ctx, region, accountId):
+        async with self.bot.session.get(BASE_URL.format(region) + MATCHES_API.format(accountId, self.league_key)) as resp:
+            return await resp.json()
+
+    async def getMatchInformation(self, ctx, region, matchId):
+        async with self.bot.session.get(BASE_URL.format(region) + MATCH_API.format(matchId, self.league_key)) as resp:
+            return await resp.json()
+
     @commands.command(name='lolprofile', aliases=["lp"])
     async def lolprofile(self, ctx, *args):
         """
@@ -58,23 +79,19 @@ class LeagueCog(commands.Cog):
         else:
             await ctx.send("Region not found. Use one of the following: \nBR, EUNE, EUW, JP, KR, LAN, LAS, NA, OCE, TR, RU, PBE")
             return
-        # Request the summoner data
-        async with self.bot.session.get(BASE_URL.format(region) + SUMMONER_API.format('{}'.format(' '.join(args[1:])), self.league_key)) as resp:
-            # If the code is 404
-            if(resp.status == 404):
-                await ctx.send("Summoner not found")
-                return
-            # If the code is 200
-            elif(resp.status == 200):
-                data = await resp.json()
+        summoner = '{}'.format(' '.join(args[1:]))
+        data = await self.getSummonerData(self, region, summoner)
+        if not data:
+            await ctx.send("Summoner not found")
+            return
 
         embed = discord.Embed(title=data.get("name"))
         embed.set_author(name=("Summoner Level - " + str(data.get("summonerLevel"))))
         embed.set_thumbnail(url=PROFILE_IMAGE_URL.format(self.league_ver, data.get("profileIconId")))
         # Request the summoner ranked data
-        async with self.bot.session.get(BASE_URL.format(region) + RANKED_API.format(data.get("id"), self.league_key)) as resp:
-            rankData = await resp.json()
-        # If summoner ranked data exists
+        summonerId = data.get("id")
+        rankData = await self.getSummonerRankedData(self, region, summonerId)
+
         if rankData:
             rankData = rankData[0]
             embed.add_field(name="Rank", value=("{} {}".format(rankData.get("tier"), rankData.get("rank"))), inline=True)
@@ -94,23 +111,17 @@ class LeagueCog(commands.Cog):
             await ctx.send("Region not found. Use one of the following: \nBR, EUNE, EUW, JP, KR, LAN, LAS, NA, OCE, TR, RU, PBE")
             return
         # Request the summoner data
-        async with self.bot.session.get(BASE_URL.format(region) + SUMMONER_API.format('{}'.format(' '.join(args[1:])), self.league_key)) as resp:
-            # If the code is 404
-            if(resp.status == 404):
-                await ctx.send("Summoner not found")
-                return
-            # If the code is 200
-            elif(resp.status == 200):
-                data = await resp.json()
-                # print(data)
-
-        async with self.bot.session.get(BASE_URL.format(region) + MATCHES_API.format(data.get("accountId"), self.league_key)) as resp:
-            rankData = await resp.json()
-            # pprint.pprint(rankData)
-
-        matchId = rankData.get("matches")[0].get("gameId")
-        async with self.bot.session.get(BASE_URL.format(region) + MATCH_API.format(matchId, self.league_key)) as resp:
-            matchData = await resp.json()
+        summoner = '{}'.format(' '.join(args[1:]))
+        data = await self.getSummonerData(self, region, summoner)
+        if not data:
+            await ctx.send("Summoner not found")
+            return
+        accountId = data.get("accountId")
+        # request the match history of the summoner
+        matchHistory = await self.getSummonerMatchHistory(self, region, accountId)
+        matchId = matchHistory.get("matches")[0].get("gameId")
+        # request match information
+        matchData = await self.getMatchInformation(self, region, matchId)
         pprint.pprint(matchData.get("participants"))
         await ctx.send("LM")
 
