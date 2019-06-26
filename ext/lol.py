@@ -38,6 +38,82 @@ REGIONS = {
     "ru": "ru",
     "pbe": "pbe1"
 }
+MATCHMAKING_QUEUES = {
+    0:	"Custom game",
+    2:	"Summoner's Rift - 5v5 Blind Pick game",
+    4:	"Summoner's Rift - 5v5 Ranked Solo game",
+    6:	"Summoner's Rift - 5v5 Ranked Premade game",
+    7:	"Summoner's Rift - Co-op vs AI game",
+    8:	"Twisted Treeline - 3v3 Normal game",
+    9:	"Twisted Treeline - 3v3 Ranked Flex game",
+    14:	"Summoner's Rift - 5v5 Draft Pick game",
+    16:	"Crystal Scar - 5v5 Dominion Blind Pick game",
+    17:	"Crystal Scar - 5v5 Dominion Draft Pick game",
+    25:	"Crystal Scar - Dominion Co-op vs AI game",
+    31:	"Summoner's Rift - Co-op vs AI Intro Bot game",
+    32:	"Summoner's Rift - Co-op vs AI Beginner Bot game",
+    33:	"Summoner's Rift - Co-op vs AI Intermediate Bot game",
+    41:	"Twisted Treeline - 3v3 Ranked Team game",
+    42:	"Summoner's Rift - 5v5 Ranked Team game",
+    52:	"Twisted Treeline - Co-op vs AI game",
+    61:	"Summoner's Rift - 5v5 Team Builder game",
+    65:	"Howling Abyss - 5v5 ARAM game",
+    67:	"Howling Abyss - ARAM Co-op vs AI game",
+    70:	"Summoner's Rift - One for All game",
+    72:	"Howling Abyss - 1v1 Snowdown Showdown game",
+    73:	"Howling Abyss - 2v2 Snowdown Showdown game",
+    75:	"Summoner's Rift - 6v6 Hexakill game",
+    76:	"Summoner's Rift - Ultra Rapid Fire game",
+    78:	"Howling Abyss - One For All: Mirror Mode game",
+    83:	"Summoner's Rift - Co-op vs AI Ultra Rapid Fire game",
+    91:	"Summoner's Rift - Doom Bots Rank 1 game",
+    92:	"Summoner's Rift - Doom Bots Rank 2 game",
+    93:	"Summoner's Rift - Doom Bots Rank 5 game",
+    96:	"Crystal Scar - Ascension game",
+    98:	"Twisted Treeline - 6v6 Hexakill game",
+    100:	"Butcher's Bridge - 5v5 ARAM game",
+    300:	"Howling Abyss - Legend of the Poro King game",
+    310:	"Summoner's Rift - Nemesis game",
+    313:	"Summoner's Rift - Black Market Brawlers game",
+    315:	"Summoner's Rift - Nexus Siege game",
+    317:	"Crystal Scar - Definitely Not Dominion game",
+    318:	"Summoner's Rift - ARURF game",
+    325:	"Summoner's Rift - All Random game",
+    400:	"Summoner's Rift - 5v5 Draft Pick game",
+    410:	"Summoner's Rift - 5v5 Ranked Dynamic game",
+    420:	"Summoner's Rift - 5v5 Ranked Solo game",
+    430:	"Summoner's Rift - 5v5 Blind Pick game",
+    440:	"Summoner's Rift - 5v5 Ranked Flex game",
+    450:	"Howling Abyss - 5v5 ARAM game",
+    460:	"Twisted Treeline - 3v3 Blind Pick game",
+    470:	"Twisted Treeline - 3v3 Ranked Flex game",
+    600:	"Summoner's Rift - Blood Hunt Assassin game",
+    610:	"Cosmic Ruins - Dark Star: Singularity game",
+    700:	"Summoner's Rift - Clash game",
+    800:	"Twisted Treeline - Co-op vs. AI Intermediate Bot game",
+    810:	"Twisted Treeline - Co-op vs. AI Intro Bot game",
+    820:	"Twisted Treeline - Co-op vs. AI Beginner Bot game",
+    830:	"Summoner's Rift - Co-op vs. AI Intro Bot game",
+    840:	"Summoner's Rift - Co-op vs. AI Beginner Bot game",
+    850:	"Summoner's Rift - Co-op vs. AI Intermediate Bot game",
+    900:	"Summoner's Rift - ARURF game",
+    910:	"Crystal Scar - Ascension game",
+    920:	"Howling Abyss - Legend of the Poro King game",
+    940:	"Summoner's Rift - Nexus Siege game",
+    950:	"Summoner's Rift - Doom Bots Voting game",
+    960:	"Summoner's Rift - Doom Bots Standard game",
+    980:	"Valoran City Park - Star Guardian Invasion: Normal game",
+    990:	"Valoran City Park - Star Guardian Invasion: Onslaught game",
+    1000:	"Overcharge	PROJECT: Hunters game",
+    1010:	"Summoner's Rift - Snow ARURF game",
+    1020:	"Summoner's Rift - One for All game",
+    1030:	"Crash Site	Odyssey Extraction: Intro game",
+    1040:	"Crash Site	Odyssey Extraction: Cadet game",
+    1050:	"Crash Site	Odyssey Extraction: Crewmember game",
+    1060:	"Crash Site	Odyssey Extraction: Captain game",
+    1070:	"Crash Site	Odyssey Extraction: Onslaught game",
+    1200:	"Nexus Blitz - Nexus Blitz game"
+}
 
 
 class LeagueCog(Cog):
@@ -127,7 +203,9 @@ class LeagueCog(Cog):
         matchId = matchHistory.get("matches")[0].get("gameId")
         # request match information
         matchData = await self.getMatchInformation(self, region, matchId)
-        gameMode = matchData.get("gameMode")
+        print(matchData.get("queueId"))
+        gameMode = MATCHMAKING_QUEUES.get(matchData.get("queueId"))
+        print(gameMode)
         matchPlayers = []
         for player in (matchData.get("participants")):
             playerDict = {
@@ -141,9 +219,9 @@ class LeagueCog(Cog):
                 "role": str(player.get("timeline").get("role"))
             }
             matchPlayers.append(playerDict)
-        print("GAME MODE: " + gameMode)
-        pprint.pprint(matchPlayers)
-        await ctx.send("LM")
+        gameinfo = "GAME MODE: {}".format(gameMode)
+        # pprint.pprint(matchData)
+        await ctx.send(gameinfo)
 
 
 def setup(bot):
