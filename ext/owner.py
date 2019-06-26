@@ -1,10 +1,11 @@
 # Import the commands extension and the rest of our tools
 import traceback
+from cog import Cog
 from discord.ext import commands
 from os.path import isfile
 
 
-class Owner(commands.Cog):
+class Owner(Cog):
     """
     Commands for the bot owner.
     """
