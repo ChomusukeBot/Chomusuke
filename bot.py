@@ -1,8 +1,12 @@
 # Start by loading the important stuff
 import aiohttp
+import logging
 from cog import Cog
 from discord.ext import commands
 from motor.motor_asyncio import AsyncIOMotorClient
+
+# The information logger
+LOGGER: logging.Logger = logging.getLogger("chomusuke")
 
 
 class Chomusuke(commands.AutoShardedBot):
@@ -12,6 +16,8 @@ class Chomusuke(commands.AutoShardedBot):
     def __init__(self, *args, **kwargs):
         # If there is a MongoDB URL in the keyword arguments
         if "database" in kwargs:
+            # Log the database status
+            LOGGER.info("Initializing MongoDB from URL")
             # Create the MongoDB/Motor instance
             self.mongo = AsyncIOMotorClient(kwargs["database"])
             # Save the bot database
@@ -20,6 +26,8 @@ class Chomusuke(commands.AutoShardedBot):
             kwargs.pop("database")
         # Otherwise
         else:
+            # Log the database status
+            LOGGER.warning("MongoDB URL not found, database support is not available")
             # Set the database to null
             self.mongo = None
             self.database = None

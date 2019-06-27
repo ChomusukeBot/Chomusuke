@@ -5,8 +5,10 @@ import logging
 import os
 import sys
 from bot import Chomusuke
+from discord.ext import commands
 from dotenv import load_dotenv
 
+# The information logger
 LOGGER: logging.Logger = logging.getLogger("chomusuke")
 
 
@@ -24,6 +26,7 @@ def main():
     # If the user requested the manual adition of .env, use python-dotenv
     if args.manual_env:
         load_dotenv()
+        LOGGER.info(".env file have been manually loaded")
 
     # If the user wants logging to stdout, configure the logger
     if args.log:
@@ -55,8 +58,9 @@ def main():
 
     # If there is a MongoDB database added
     if "MONGODB_URL" in os.environ:
-        # Add the database to our keyword arguments
+        # Add the database to our keyword arguments and notify the user
         kwargs["database"] = os.environ["MONGODB_URL"]
+        LOGGER.info("Found MongoDB URL on the environment variables")
 
     # Create our bot instance
     bot = Chomusuke(**kwargs)
@@ -65,11 +69,15 @@ def main():
     for file in [x for x in os.listdir("ext") if x.endswith(".py")]:
         # Try to load the extension
         try:
+            LOGGER.info(f"Attempting to load {file}...")
             bot.load_extension("ext." + os.path.splitext(file)[0])
-        # If there was a problem, intercept the exception
-        # TODO: Change to real logging
-        except Exception:
-            print(f"Unable to load {file}")
+        # If there was a problem, intercept the exception and log what happened
+        except commands.ExtensionNotFound:
+            LOGGER.warning(f"The extension {file} was already loaded")
+        except commands.NoEntryPointError:
+            LOGGER.error(f"The extension {file} does not has a setup(bot) function")
+        except commands.ExtensionFailed as e:
+            LOGGER.exception(e.original)
 
     # We have everything, start loading the bot
     try:
