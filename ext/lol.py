@@ -153,6 +153,16 @@ class LeagueCog(Cog):
         async with self.bot.session.get(BASE_URL.format(region) + MATCH_API.format(matchId, self.league_key)) as resp:
             return await resp.json()
 
+    def getPlayerString(self, ctx, player, lane, role):
+        if(player.get("lane") == lane):
+            if(player.get("role") == role):
+                return "{} - {} ({}/{}/{})\n".format(player.get("summonerName"), self.champNames.get(player.get("champion")),
+                                                     player.get("kills"), player.get("deaths"), player.get("assists"))
+            else:
+                return ""
+        else:
+            return ""
+
     def secondsToText(ctx, secs):
         days = secs//86400
         hours = (secs - days*86400)//3600
@@ -218,7 +228,6 @@ class LeagueCog(Cog):
         # Request match information
         matchData = await self.getMatchInformation(self, region, matchId)
         # Grab important match data
-        # gameModeLeague = matchData.get("gameMode")
         gameMode = MATCHMAKING_QUEUES.get(matchData.get("queueId"))
         gameDuration = matchData.get("gameDuration")
         matchTimeStamp = matchData.get("gameCreation")
@@ -259,21 +268,67 @@ class LeagueCog(Cog):
             timeStamp = str(elapsedDays.days) + " days ago"
         # Embed creation
         embed = discord.Embed(title=(gameinfo + " ({})".format(timeStamp)), description=("Game duration: " + time), colour=0xEDB24C)
+        blueTeamSorted = ""
         blueTeamString = ""
+        redTeamSorted = ""
         redTeamString = ""
+        counter = 0
         for player in blueTeam:
+            if(player.get("lane") == "TOP"):
+                first = self.getPlayerString(self, player, "TOP", "SOLO")
+                counter += 1
+            if(player.get("lane") == "JUNGLE"):
+                second = self.getPlayerString(self, player, "JUNGLE", "NONE")
+                counter += 1
+            if(player.get("lane") == "MIDDLE"):
+                third = self.getPlayerString(self, player, "MIDDLE", "SOLO")
+                counter += 1
+            if(player.get("lane") == "BOTTOM" and player.get("role") == "DUO_CARRY"):
+                fourth = self.getPlayerString(self, player, "BOTTOM", "DUO_CARRY")
+                counter += 1
+            if(player.get("lane") == "BOTTOM" and player.get("role") == "DUO_SUPPORT"):
+                fifth = self.getPlayerString(self, player, "BOTTOM", "DUO_SUPPORT")
+                counter += 1
             blueTeamString += "{} - {} ({}/{}/{})\n".format(player.get("summonerName"), self.champNames.get(player.get("champion")),
                                                             player.get("kills"), player.get("deaths"), player.get("assists"))
+        blueTeamSorted = blueTeamString
+        try:
+            if first and second and third and fourth and fifth:
+                blueTeamSorted = "{}{}{}{}{}".format(first, second, third, fourth, fifth)
+        except UnboundLocalError:
+            print("Old game data format.")
         embed.add_field(name="<:large_blue_circle:593787888861315078> BLUE TEAM <:large_blue_circle:593787888861315078>",
-                        value=blueTeamString, inline=False)
+                        value=blueTeamSorted, inline=False)
+        counter = 0
         for player in redTeam:
+            if(player.get("lane") == "TOP"):
+                first = self.getPlayerString(self, player, "TOP", "SOLO")
+                counter += 1
+            if(player.get("lane") == "JUNGLE"):
+                second = self.getPlayerString(self, player, "JUNGLE", "NONE")
+                counter += 1
+            if(player.get("lane") == "MIDDLE"):
+                third = self.getPlayerString(self, player, "MIDDLE", "SOLO")
+                counter += 1
+            if(player.get("lane") == "BOTTOM" and player.get("role") == "DUO_CARRY"):
+                fourth = self.getPlayerString(self, player, "BOTTOM", "DUO_CARRY")
+                counter += 1
+            if(player.get("lane") == "BOTTOM" and player.get("role") == "DUO_SUPPORT"):
+                fifth = self.getPlayerString(self, player, "BOTTOM", "DUO_SUPPORT")
+                counter += 1
             redTeamString += "{} - {} ({}/{}/{})\n".format(player.get("summonerName"), self.champNames.get(player.get("champion")),
                                                            player.get("kills"), player.get("deaths"), player.get("assists"))
-        embed.add_field(name="<:red_circle:593788287974375455> RED TEAM <:red_circle:593788287974375455>", value=redTeamString, inline=False)
+        redTeamSorted = redTeamString
+        try:
+            if first and second and third and fourth and fifth:
+                redTeamSorted = "{}{}{}{}{}".format(first, second, third, fourth, fifth)
+        except UnboundLocalError:
+            print("Old game data format.")
+        embed.add_field(name="<:red_circle:593788287974375455> RED TEAM <:red_circle:593788287974375455>", value=redTeamSorted, inline=False)
         if(blueTeam[0].get("win")):
-            embed.set_footer(text="Blue team won!")
+            embed.set_footer(text="Blue team won! The values in parenthesis represent (Kill/Death/Assist)")
         else:
-            embed.set_footer(text="Red team won!")
+            embed.set_footer(text="Red team won! The values in parenthesis represent (Kill/Death/Assist)")
         await ctx.send(embed=embed)
 
 
