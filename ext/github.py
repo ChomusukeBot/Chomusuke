@@ -7,7 +7,17 @@ import os
 from cog import Cog
 from discord.ext import commands
 
-
+# The list of endpoints that we are going to use
+ENDPOINTS = {
+    "image": "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png",
+    "repos": "https://api.github.com/users/{0}/repos?sort=updated"
+}
+# Default request parameters
+PARAMETERS = {
+    "client_id": os.environ.get("GITHUB_ID"),
+    "client_secret": os.environ.get("GITHUB_SECRET")
+}
+# Our default headers for all of the requests
 HEADERS = {
     "Accept": "application/vnd.github.v3+json",
     "Content-Type": "application/json",
