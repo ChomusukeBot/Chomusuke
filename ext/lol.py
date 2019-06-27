@@ -219,7 +219,7 @@ class LeagueCog(Cog):
         summoner = summonerName
         data = await self.getSummonerData(self, region, summoner)
         if not data:
-            await ctx.send("Summoner not found")
+            await ctx.send('Summoner not found. If using a multi-word summoner name remember to use quotation marks ""')
             return
         accountId = data.get("accountId")
         # Request the match history of the summoner
@@ -322,7 +322,7 @@ class LeagueCog(Cog):
                     fifth = self.getPlayerString(self, player, "BOTTOM", "DUO_SUPPORT")
                     counter += 1
                 redTeamString += "{} - {} ({}/{}/{})\n".format(player.get("summonerName"), self.champNames.get(player.get("champion")),
-                                                            player.get("kills"), player.get("deaths"), player.get("assists"))
+                                                               player.get("kills"), player.get("deaths"), player.get("assists"))
             redTeamSorted = redTeamString
             try:
                 if first and second and third and fourth and fifth:
