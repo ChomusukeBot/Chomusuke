@@ -96,11 +96,9 @@ def main():
                                                                return_asyncio_server=True))
             loop.run_until_complete(server.start_serving())
         loop.run_until_complete(bot.connect())
-        loop.run_until_complete(web.stop())
     except KeyboardInterrupt:
         # After a CTRL+C or CTRL+Z, log out the bot and disconnect everything
         loop.run_until_complete(bot.logout())
-        loop.run_until_complete(web.stop())
     finally:
         # Afer finishing, grab all tasks
         tasks = asyncio.all_tasks(loop)
