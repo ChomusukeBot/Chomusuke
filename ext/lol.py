@@ -153,13 +153,6 @@ class LeagueCog(Cog):
         async with self.bot.session.get(BASE_URL.format(region) + MATCH_API.format(matchId, self.league_key)) as resp:
             return await resp.json()
 
-    async def getChampionName(self, ctx):
-        champions = json.loads(requests.get(CHAMPIONS_URL.format(self.league_ver)).text).get("data")
-        champNames = {}
-        for champ in champions:
-            champNames[champions.get(champ).get("key")] = champions.get(champ).get("id")
-        return champNames
-
     def secondsToText(ctx, secs):
         days = secs//86400
         hours = (secs - days*86400)//3600
