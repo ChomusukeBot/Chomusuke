@@ -221,6 +221,12 @@ class LeagueCog(Cog):
         if not data:
             await ctx.send('Summoner not found. If using a multi-word summoner name remember to use quotation marks ""')
             return
+        # Check how many matches the user requested
+        if(int(numberOfMatches) > 5):
+            await ctx.send("I am only allowed to send you a maximum of 5 matches.")
+            return
+        elif(int(numberOfMatches) < 1):
+            numberOfMatches = str(1)
         accountId = data.get("accountId")
         # Request the match history of the summoner
         params = 'endIndex='+numberOfMatches
