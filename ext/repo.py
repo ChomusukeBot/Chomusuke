@@ -162,8 +162,14 @@ class Repo(Cog):
         # Create a place to store the repository data
         desc = ""
 
+        # If there is a function to format the repo URL
+        if getattr(self, "get_user", None):
+            url = self.endpoints["repos"].format(await self.get_user())
+        else:
+            url = self.endpoints["repos"]
+
         # Request the list of user repos
-        async with self.bot.session.get(self.endpoints["repos"], headers=await self.generate_headers(ctx)) as resp:
+        async with self.bot.session.get(url, headers=await self.generate_headers(ctx)) as resp:
             # If we didn't got a code 200, notify the user and return
             if resp.status != 200:
                 await ctx.send(f"Unable to get your list of repos: Code {resp.status}")
