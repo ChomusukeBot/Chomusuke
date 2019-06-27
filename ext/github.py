@@ -30,7 +30,9 @@ class Github(Cog):
 
     @commands.group(name="github", invoke_without_command=True)
     async def github(self, ctx):
-        """A set of commands to get information from github."""
+        """
+        A set of commands to get information from GitHub.
+        """
 
     @github.command(name="repo", aliases=["r"])
     async def get_repository_information(self, ctx, repo_name: str, author: str = None):
@@ -66,9 +68,8 @@ class Github(Cog):
     @github.command(name="search", aliases=["s"])
     async def search_repository(self, ctx, repo_name: str):
         """
-        This command will get the top 5 repositories sorted by stars.
-
-        Syntax- c!github s <repo name>
+        Searches for repositories with the specified name or slug.
+        Please note that the search is limited to 5 results.
         """
         embed = await self.search_repos(repo_name, 5)
         await ctx.send(embed=embed)
@@ -121,9 +122,7 @@ class Github(Cog):
     @github.command(name="issue", aliases=["i"])
     async def get_issues(self, ctx, owner: str, repo: str, issue_id: int):
         """
-        A command to get complete information about an issue.
-
-        Syntax- c!github i <owner of repo> <repo name> <issue id>
+        Gets the complete information about an issue.
         """
         session = self.bot.http_session
         url = f"https://api.github.com/repos/{owner}/{repo}/issues/{issue_id}"
