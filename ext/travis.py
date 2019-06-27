@@ -77,4 +77,4 @@ def setup(bot):
     if bot.mongo:
         bot.add_cog(Travis(bot, "travis", "token", HEADERS, ENDPOINTS))
     else:
-        LOGGER.error(f"{AppVeyor} has not been loaded because MongoDB is required")
+        LOGGER.error(f"{Travis} has not been loaded because MongoDB is required")
