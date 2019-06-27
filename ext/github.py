@@ -1,14 +1,14 @@
 # Import the commands extension
 import aiohttp
-import asyncio
 import discord
 import os
+
 from cog import Cog
 from discord.ext import commands
 
 
 headers = {
-            "Content-Type":"application/json",
+            "Content-Type": "application/json",
             "Accept": "application/json"
         }
 
@@ -19,7 +19,7 @@ class Github(Cog):
     """
     def __init__(self, bot):
         # Save our bot for later use
-        self.bot.http_session    = aiohttp.ClientSession()
+        self.bot.http_session = aiohttp.ClientSession()
         self.bot = bot
 
     async def fetch(self, session, url, params={}):
@@ -42,8 +42,8 @@ class Github(Cog):
             <owner of repository> is not a compulsary argument.
 
         """
-        embed = discord.Embed(colour = discord.Colour.blue())
-        session = self.bot.http_session  
+        embed = discord.Embed(colour=discord.Colour.blue())
+        session = self.bot.http_session
         if author is None:
             embed = await self.search_repos(repo_name, 1)
         else:
@@ -60,9 +60,9 @@ class Github(Cog):
             else:
                 pass
             embed.url = data["html_url"]
-        
+
         await ctx.send(embed=embed)
-        
+
     @github.command(name="search", aliases=["s"])
     async def search_repository(self, ctx, repo_name: str):
         """
@@ -72,15 +72,15 @@ class Github(Cog):
         """
         embed = await self.search_repos(repo_name, 5)
         await ctx.send(embed=embed)
-        
+
     async def search_repos(self, repo_name, no_of_repos: int):
-        embed = discord.Embed(colour = discord.Colour.blue())
+        embed = discord.Embed(colour=discord.Colour.blue())
         url = "https://api.github.com/search/repositories"
         params = {
             "q": repo_name,
             "sort": "stars"
         }
-        session = self.bot.http_session  
+        session = self.bot.http_session
         data = await self.fetch(session, url, params)
         if data["total_count"] == 0:
             embed.title = "Repository not found!"
@@ -97,7 +97,7 @@ class Github(Cog):
                 embed.title = f"Name: {repo_name}"
                 field_name = f"Owner: {x['owner']['login']}"
                 embed.url = x["html_url"]
-            i+=1
+            i += 1
             if x["description"] is None:
                 message = "No description avilable."
             else:
@@ -110,8 +110,8 @@ class Github(Cog):
                 else:
                     pass
             embed.add_field(
-                name = field_name,
-                value = value_field,
+                name=field_name,
+                value=value_field,
                 inline=False
             )
             if i == no_of_repos:
@@ -124,13 +124,12 @@ class Github(Cog):
         A command to get complete information about an issue.
 
         Syntax- c!github i <owner of repo> <repo name> <issue id>
-        
         """
-        session = self.bot.http_session  
+        session = self.bot.http_session
         url = f"https://api.github.com/repos/{owner}/{repo}/issues/{issue_id}"
         data = await self.fetch(session, url)
         if data["message"]:
-                return await ctx.send("Invalid Repository name or owner name or issue number!")
+            return await ctx.send("Invalid Repository name or owner name or issue number!")
         embed = discord.Embed(colour=discord.Colour.blue())
         embed.title = data["title"]
         embed.url = data["html_url"]
@@ -151,16 +150,16 @@ class Github(Cog):
     @commands.group(aliases=["label", "l"])
     async def labels(self, ctx, owner: str, repo: str):
         """A command to get all the labels in a repository."""
-        session = self.bot.http_session  
+        session = self.bot.http_session
         url = f"https://api.github.com/repos/{owner}/{repo}/labels"
         data = await self.fetch(session, url)
-        label_len = len(data)
         embed = discord.Embed(colour=discord.Colour.blue())
         embed.title = "Labels"
         embed.description = ""
         for i, label in enumerate(data, start=1):
             embed.description += f"{i}. **{label['name']}**\n"
         await ctx.send(embed=embed)
+
 
 def setup(bot):
     """
