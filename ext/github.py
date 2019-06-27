@@ -7,9 +7,9 @@ from cog import Cog
 from discord.ext import commands
 
 
-headers = {
-    "Content-Type": "application/json",
-    "Accept": "application/json"
+HEADERS = {
+    "Accept": "application/vnd.github.v3+json",
+    "Content-Type": "application/json"
 }
 
 
@@ -24,7 +24,7 @@ class Github(Cog):
     async def fetch(self, session, url, params={}):
         auth = aiohttp.BasicAuth(os.environ.get("AUTH_EMAIL"), os.environ.get("AUTH_PASS"))
         session.auth = auth
-        async with session.get(url=url, headers=headers, params=params) as response:
+        async with session.get(url=url, headers=HEADERS, params=params) as response:
             return await response.json()
 
     @commands.group()
