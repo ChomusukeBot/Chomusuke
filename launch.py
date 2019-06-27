@@ -1,15 +1,26 @@
 # Import our little set of tools
+import argparse
 import asyncio
 import os
 import sys
-# Import the bot class
 from bot import Chomusuke
+from dotenv import load_dotenv
 
 
 def main():
     """
     Our main function.
     """
+    # Start by creating our parser
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--manual-env", dest="manual_env", action="store_true", help="if the .env file should be loaded manually by the bot")
+    # Parse our arguments
+    args = parser.parse_args()
+
+    # If the user requested the manual adition of .env, use python-dotenv
+    if args.manual_env:
+        load_dotenv()
+
     # If the discord token is not on the environment variables
     if "DISCORD_TOKEN" not in os.environ:
         # Exit with a code 2
