@@ -5,6 +5,7 @@ import os
 import requests
 from cog import Cog
 import json
+import datetime
 
 # Base URL for all API calls
 BASE_URL = "https://{}.api.riotgames.com"
@@ -209,12 +210,12 @@ class LeagueCog(Cog):
         # request the match history of the summoner
         matchHistory = await self.getSummonerMatchHistory(self, region, accountId)
         matchId = matchHistory.get("matches")[0].get("gameId")
-        matchTimeStamp = matchHistory.get("matches")[0].get("timestamp")
         # request match information
         matchData = await self.getMatchInformation(self, region, matchId)
         gameModeLeague = matchData.get("gameMode")
         gameMode = MATCHMAKING_QUEUES.get(matchData.get("queueId"))
         gameDuration = matchData.get("gameDuration")
+        matchTimeStamp = matchData.get("gameCreation")
         matchPlayers = []
         for player in (matchData.get("participants")):
             playerDict = {
@@ -237,9 +238,18 @@ class LeagueCog(Cog):
         # Time
         time = self.secondsToText(gameDuration)
         # split players into teams
+        print(matchTimeStamp)
         blueTeam = matchPlayers[:5]
         redTeam = matchPlayers[5:]
-        embed = discord.Embed(title=gameinfo, description=("Game duration: " + time))
+        currentTime = datetime.datetime.now()
+        elapsedDays = currentTime - datetime.datetime.fromtimestamp(matchTimeStamp/1000.0)
+        if(elapsedDays.days == 0):
+            timeStamp = "today"
+        elif(elapsedDays.days == 1):
+            timeStamp = "1 day ago"
+        else:
+            timeStamp = str(elapsedDays.days) + " days ago"
+        embed = discord.Embed(title=(gameinfo + " ({})".format(timeStamp)), description=("Game duration: " + time), colour=0xEDB24C)
         if(gameModeLeague == "CLASSIC"):
             print("CLASSIC")
         else:
