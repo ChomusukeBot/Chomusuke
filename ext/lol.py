@@ -6,6 +6,7 @@ import requests
 from cog import Cog
 import json
 import datetime
+import pprint
 
 # Base URL for all API calls
 BASE_URL = "https://{}.api.riotgames.com"
@@ -247,6 +248,11 @@ class LeagueCog(Cog):
             blueTeamString = ""
             redTeamSorted = ""
             redTeamString = ""
+            first = ""
+            second = ""
+            third = ""
+            fourth = ""
+            fifth = ""
             # Blue team sorted or unsorted
             for player in blueTeam:
                 if(player.get("lane") == "TOP"):
