@@ -1,6 +1,7 @@
 # Import the commands extension
 import aiohttp
 import discord
+import logging
 import os
 
 from cog import Cog
@@ -12,6 +13,8 @@ HEADERS = {
     "Content-Type": "application/json",
     "User-Agent": "Chomusuke (+https://github.com/justalemon/Chomusuke)"
 }
+# The information logger
+LOGGER: logging.Logger = logging.getLogger("chomusuke")
 
 
 class Github(Cog):
