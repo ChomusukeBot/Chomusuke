@@ -13,9 +13,12 @@
             "name": "Manual .env",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}/launch.py --manual-env",
+            "program": "${workspaceFolder}/launch.py",
             "console": "integratedTerminal",
-            "envFile": ""
+            "envFile": "",
+            "args": [
+                "--manual-env"
+            ]
         },
         {
             "name": "No .env",
