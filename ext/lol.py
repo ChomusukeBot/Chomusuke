@@ -243,15 +243,17 @@ class LeagueCog(Cog):
         if(gameModeLeague == "CLASSIC"):
             print("CLASSIC")
         else:
-            embed.add_field(name="BLUE TEAM", value="\u200b", inline=True)
-            embed.add_field(name="RED TEAM", value="\u200b", inline=True)
-            embed.add_field(name="\u200b", value="\u200b", inline=True)
-            for player, player2 in zip(blueTeam, redTeam):
-                embed.add_field(name=player.get("summonerName"), value=(player.get("champion") + " - " + "{}/{}/{}".format(player.get("kills"),
-                                player.get("deaths"), player.get("assists"))), inline=True)
-                embed.add_field(name=player2.get("summonerName"), value=(player2.get("champion") + " - " + "{}/{}/{}".format(player2.get("kills"),
-                                player2.get("deaths"), player2.get("assists"))), inline=True)
-                embed.add_field(name="\u200b", value="\u200b", inline=True)
+            blueTeamString = ""
+            redTeamString = ""
+            for player in blueTeam:
+                blueTeamString += "{} - {} ({}/{}/{})\n".format(player.get("summonerName"), player.get("champion"), player.get("kills"),
+                                                                player.get("deaths"), player.get("assists"))
+            embed.add_field(name="<:large_blue_circle:593787888861315078> BLUE TEAM <:large_blue_circle:593787888861315078>",
+                            value=blueTeamString, inline=False)
+            for player in redTeam:
+                redTeamString += "{} - {} ({}/{}/{})\n".format(player.get("summonerName"), player.get("champion"), player.get("kills"),
+                                                               player.get("deaths"), player.get("assists"))
+            embed.add_field(name="<:red_circle:593788287974375455> RED TEAM <:red_circle:593788287974375455>", value=redTeamString, inline=False)
             if(blueTeam[0].get("win")):
                 embed.set_footer(text="Blue team won!")
             else:
