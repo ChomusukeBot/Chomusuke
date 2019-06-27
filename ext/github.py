@@ -10,19 +10,22 @@ from discord.ext import commands
 from cog import Cog
 
 
-class GithubIntegration(Cog):
+headers = {
+            "Content-Type":"application/json",
+            "Accept": "application/json"
+        }
+
+
+class Github(Cog):
     """
     A class containing commands/functions for Github Integration.
     """
     def __init__(self, bot):
         # Save our bot for later use
+        self.bot.http_session    = aiohttp.ClientSession()
         self.bot = bot
 
     async def fetch(self, session, url, params={}):
-        headers = {
-            "Content-Type":"application/json",
-            "Accept": "application/json"
-        }
         auth = aiohttp.BasicAuth(os.environ.get("AUTH_EMAIL"), os.environ.get("AUTH_PASS"))
         session.auth = auth
         async with session.get(url=url, headers=headers, params=params) as response:
@@ -43,7 +46,7 @@ class GithubIntegration(Cog):
 
         """
         embed = discord.Embed(colour = discord.Colour.blue())
-        session = self.bot.http_session
+        session = self.bot.http_session  
         if author is None:
             embed = await self.search_repos(repo_name, 1)
         else:
@@ -80,7 +83,7 @@ class GithubIntegration(Cog):
             "q": repo_name,
             "sort": "stars"
         }
-        session = self.bot.http_session
+        session = self.bot.http_session  
         data = await self.fetch(session, url, params)
         if data["total_count"] == 0:
             embed.title = "Repository not found!"
@@ -126,7 +129,7 @@ class GithubIntegration(Cog):
         Syntax- c!github i <owner of repo> <repo name> <issue id>
         
         """
-        session = self.bot.http_session
+        session = self.bot.http_session  
         url = f"https://api.github.com/repos/{owner}/{repo}/issues/{issue_id}"
         data = await self.fetch(session, url)
         if data["message"]:
@@ -148,10 +151,10 @@ class GithubIntegration(Cog):
             embed.description = data["body"][0:1900] + "..."
         await ctx.send(embed=embed)
 
-    @commands.group(name="labels", aliases=["label", "l"], invoke_without_command=True)
-    async def get_labels(self, ctx, owner: str, repo: str):
+    @commands.group(aliases=["label", "l"])
+    async def labels(self, ctx, owner: str, repo: str):
         """A command to get all the labels in a repository."""
-        session = self.bot.http_session
+        session = self.bot.http_session  
         url = f"https://api.github.com/repos/{owner}/{repo}/labels"
         data = await self.fetch(session, url)
         label_len = len(data)
@@ -166,5 +169,4 @@ def setup(bot):
     """
     Our function called to add the cog to our bot.
     """
-    bot.http_session = aiohttp.ClientSession()
-    bot.add_cog(GithubIntegration(bot))
+    bot.add_cog(Github(bot))
