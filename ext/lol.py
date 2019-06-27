@@ -225,11 +225,8 @@ class LeagueCog(Cog):
         # Request the match history of the summoner
         params = 'endIndex='+numberOfMatches
         matchHistory = await self.getSummonerMatchHistory(self, region, accountId, params)
-        print(matchHistory)
         for match in matchHistory.get("matches"):
-            print(match)
             matchId = match.get("gameId")
-            print(matchId)
             # Request match information
             matchData = await self.getMatchInformation(self, region, matchId)
             # Grab important match data
