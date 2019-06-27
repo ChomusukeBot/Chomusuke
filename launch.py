@@ -7,6 +7,7 @@ import sys
 from bot import Chomusuke
 from discord.ext import commands
 from dotenv import load_dotenv
+from web import WebServer
 
 # The information logger
 LOGGER: logging.Logger = logging.getLogger("chomusuke")
@@ -20,6 +21,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--manual-env", dest="manual_env", action="store_true", help="if the .env file should be loaded manually by the bot")
     parser.add_argument("--log", dest="log", action="store_false", help="if we should log the bot actions to stdout")
+    parser.add_argument("--web", dest="web", action="store_false", help="disable the launch of the web server")
     # Parse our arguments
     args = parser.parse_args()
 
@@ -62,8 +64,9 @@ def main():
         kwargs["database"] = os.environ["MONGODB_URL"]
         LOGGER.info("Found MongoDB URL on the environment variables")
 
-    # Create our bot instance
+    # Create our bot and web server instance
     bot = Chomusuke(**kwargs)
+    web = WebServer(bot)
 
     # Iterate over the python files from the ext folder
     for file in [x for x in os.listdir("ext") if x.endswith(".py")]:
@@ -85,10 +88,19 @@ def main():
         loop = asyncio.get_event_loop()
         # Log and connect the user
         loop.run_until_complete(bot.login(os.environ["DISCORD_TOKEN"]))
+        # If the user wants the web server, generate it and start serving
+        if args.web:
+            LOGGER.info("Starting Sanic web server")
+            server = loop.run_until_complete(web.create_server(host=os.environ.get("SANIC_HOST", "0.0.0.0"),
+                                                               port=int(os.environ.get("SANIC_PORT", 80)),
+                                                               return_asyncio_server=True))
+            loop.run_until_complete(server.start_serving())
         loop.run_until_complete(bot.connect())
+        loop.run_until_complete(web.stop())
     except KeyboardInterrupt:
         # After a CTRL+C or CTRL+Z, log out the bot and disconnect everything
         loop.run_until_complete(bot.logout())
+        loop.run_until_complete(web.stop())
     finally:
         # Afer finishing, grab all tasks
         tasks = asyncio.all_tasks(loop)
