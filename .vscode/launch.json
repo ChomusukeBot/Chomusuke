@@ -2,11 +2,28 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python: Normal Run",
+            "name": "Normal Run",
             "type": "python",
             "request": "launch",
             "program": "${workspaceFolder}/launch.py",
             "console": "integratedTerminal",
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "name": "Manual .env",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/launch.py --manual-env",
+            "console": "integratedTerminal",
+            "envFile": ""
+        },
+        {
+            "name": "No .env",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/launch.py",
+            "console": "integratedTerminal",
+            "envFile": ""
         }
     ]
 }
