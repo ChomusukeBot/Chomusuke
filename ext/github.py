@@ -28,14 +28,14 @@ class Github(Cog):
         async with session.get(url=url, headers=headers, params=params) as response:
             return await response.json()
 
-    @commands.group(name="github", invoke_without_command=True)
+    @commands.group()
     async def github(self, ctx):
         """
         A set of commands to get information from GitHub.
         """
 
-    @github.command(name="repo", aliases=["r"])
-    async def get_repository_information(self, ctx, repo_name: str, author: str = None):
+    @github.command(aliases=["r"])
+    async def repo(self, ctx, repo_name: str, author: str = None):
         """
             A command to get information about a repository.
             example - c!github r <repository name> <owner of repository>
@@ -65,8 +65,8 @@ class Github(Cog):
 
         await ctx.send(embed=embed)
 
-    @github.command(name="search", aliases=["s"])
-    async def search_repository(self, ctx, repo_name: str):
+    @github.command(aliases=["s"])
+    async def search(self, ctx, repo_name: str):
         """
         Searches for repositories with the specified name or slug.
         Please note that the search is limited to 5 results.
@@ -119,8 +119,8 @@ class Github(Cog):
                 break
         return embed
 
-    @github.command(name="issue", aliases=["i"])
-    async def get_issues(self, ctx, owner: str, repo: str, issue_id: int):
+    @github.command(aliases=["i"])
+    async def issue(self, ctx, owner: str, repo: str, issue_id: int):
         """
         Gets the complete information about an issue.
         """
@@ -146,9 +146,11 @@ class Github(Cog):
             embed.description = data["body"][0:1900] + "..."
         await ctx.send(embed=embed)
 
-    @commands.group(aliases=["label", "l"])
+    @commands.group(aliases=["l"])
     async def labels(self, ctx, owner: str, repo: str):
-        """A command to get all the labels in a repository."""
+        """
+        Gets all the labels in a repository.
+        """
         session = self.bot.http_session
         url = f"https://api.github.com/repos/{owner}/{repo}/labels"
         data = await self.fetch(session, url)
