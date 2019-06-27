@@ -138,7 +138,7 @@ class LeagueCog(Cog):
     @commands.command(name='lolprofile', aliases=["lp"])
     async def lolprofile(self, ctx, region, summonerName):
         """
-        Generates an embed displaying the specified users LoL Profile.
+        Displays a summoner's profile.
         """
         # Check if the specified region is correct
         if(region.lower() in REGIONS):
