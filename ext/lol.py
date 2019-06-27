@@ -6,6 +6,7 @@ import requests
 from cog import Cog
 import json
 import datetime
+import pprint
 
 # Base URL for all API calls
 BASE_URL = "https://{}.api.riotgames.com"
@@ -147,6 +148,12 @@ class LeagueCog(Cog):
     async def getMatchInformation(self, ctx, region, matchId):
         async with self.bot.session.get(BASE_URL.format(region) + MATCH_API.format(matchId, self.league_key)) as resp:
             return await resp.json()
+    
+    async def getChampionName(self, ctx, championId):
+        champions = json.loads(requests.get(CHAMPIONS_URL.format(self.league_ver)).text).get("data")
+        for champ in champions:
+            if(champions.get(champ).get("key") == str(championId)):
+                return champions.get(champ).get("id")
 
     def secondsToText(ctx, secs):
         days = secs//86400
@@ -207,15 +214,17 @@ class LeagueCog(Cog):
             await ctx.send("Summoner not found")
             return
         accountId = data.get("accountId")
-        # request the match history of the summoner
+        # Request the match history of the summoner
         matchHistory = await self.getSummonerMatchHistory(self, region, accountId)
         matchId = matchHistory.get("matches")[0].get("gameId")
-        # request match information
+        # Request match information
         matchData = await self.getMatchInformation(self, region, matchId)
+        # Grab important match data
         gameModeLeague = matchData.get("gameMode")
         gameMode = MATCHMAKING_QUEUES.get(matchData.get("queueId"))
         gameDuration = matchData.get("gameDuration")
         matchTimeStamp = matchData.get("gameCreation")
+        # Grab Participant Data
         matchPlayers = []
         for player in (matchData.get("participants")):
             playerDict = {
@@ -230,6 +239,7 @@ class LeagueCog(Cog):
                 "win": player.get("stats").get("win")
             }
             matchPlayers.append(playerDict)
+        # Grab summoner names from participantIds
         gameinfo = gameMode
         for player in matchPlayers:
             for participant in matchData.get("participantIdentities"):
@@ -237,10 +247,10 @@ class LeagueCog(Cog):
                     player["summonerName"] = participant.get("player").get("summonerName")
         # Time
         time = self.secondsToText(gameDuration)
-        # split players into teams
-        print(matchTimeStamp)
+        # Split players into teams
         blueTeam = matchPlayers[:5]
         redTeam = matchPlayers[5:]
+        # TimeStamp calculation
         currentTime = datetime.datetime.now()
         elapsedDays = currentTime - datetime.datetime.fromtimestamp(matchTimeStamp/1000.0)
         if(elapsedDays.days == 0):
@@ -249,6 +259,7 @@ class LeagueCog(Cog):
             timeStamp = "1 day ago"
         else:
             timeStamp = str(elapsedDays.days) + " days ago"
+        # Embed creation
         embed = discord.Embed(title=(gameinfo + " ({})".format(timeStamp)), description=("Game duration: " + time), colour=0xEDB24C)
         if(gameModeLeague == "CLASSIC"):
             print("CLASSIC")
@@ -256,13 +267,13 @@ class LeagueCog(Cog):
             blueTeamString = ""
             redTeamString = ""
             for player in blueTeam:
-                blueTeamString += "{} - {} ({}/{}/{})\n".format(player.get("summonerName"), player.get("champion"), player.get("kills"),
-                                                                player.get("deaths"), player.get("assists"))
+                blueTeamString += "{} - {} ({}/{}/{})\n".format(player.get("summonerName"), await self.getChampionName(self, player.get("champion")),
+                                                                player.get("kills"), player.get("deaths"), player.get("assists"))
             embed.add_field(name="<:large_blue_circle:593787888861315078> BLUE TEAM <:large_blue_circle:593787888861315078>",
                             value=blueTeamString, inline=False)
             for player in redTeam:
-                redTeamString += "{} - {} ({}/{}/{})\n".format(player.get("summonerName"), player.get("champion"), player.get("kills"),
-                                                               player.get("deaths"), player.get("assists"))
+                redTeamString += "{} - {} ({}/{}/{})\n".format(player.get("summonerName"), await self.getChampionName(self, player.get("champion")),
+                                                                player.get("kills"), player.get("deaths"), player.get("assists"))
             embed.add_field(name="<:red_circle:593788287974375455> RED TEAM <:red_circle:593788287974375455>", value=redTeamString, inline=False)
             if(blueTeam[0].get("win")):
                 embed.set_footer(text="Blue team won!")
