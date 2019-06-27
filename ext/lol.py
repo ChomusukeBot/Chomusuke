@@ -126,6 +126,11 @@ class LeagueCog(Cog):
         # Save the league api key and the current league version
         self.league_key = os.environ["LEAGUE_TOKEN"]
         self.league_ver = json.loads(requests.get(LEAGUE_VERSION).text)[0]
+        champions = json.loads(requests.get(CHAMPIONS_URL.format(self.league_ver)).text).get("data")
+        champNames = {}
+        for champ in champions:
+            champNames[champions.get(champ).get("key")] = champions.get(champ).get("id")
+        self.champNames = champNames
 
     async def getSummonerData(self, ctx, region, summoner):
         async with self.bot.session.get(BASE_URL.format(region) + SUMMONER_API.format(summoner, self. league_key)) as resp:
@@ -148,11 +153,12 @@ class LeagueCog(Cog):
         async with self.bot.session.get(BASE_URL.format(region) + MATCH_API.format(matchId, self.league_key)) as resp:
             return await resp.json()
 
-    async def getChampionName(self, ctx, championId):
+    async def getChampionName(self, ctx):
         champions = json.loads(requests.get(CHAMPIONS_URL.format(self.league_ver)).text).get("data")
+        champNames = {}
         for champ in champions:
-            if(champions.get(champ).get("key") == str(championId)):
-                return champions.get(champ).get("id")
+            champNames[champions.get(champ).get("key")] = champions.get(champ).get("id")
+        return champNames
 
     def secondsToText(ctx, secs):
         days = secs//86400
@@ -263,12 +269,12 @@ class LeagueCog(Cog):
         blueTeamString = ""
         redTeamString = ""
         for player in blueTeam:
-            blueTeamString += "{} - {} ({}/{}/{})\n".format(player.get("summonerName"), await self.getChampionName(self, player.get("champion")),
+            blueTeamString += "{} - {} ({}/{}/{})\n".format(player.get("summonerName"), self.champNames.get(player.get("champion")),
                                                             player.get("kills"), player.get("deaths"), player.get("assists"))
         embed.add_field(name="<:large_blue_circle:593787888861315078> BLUE TEAM <:large_blue_circle:593787888861315078>",
                         value=blueTeamString, inline=False)
         for player in redTeam:
-            redTeamString += "{} - {} ({}/{}/{})\n".format(player.get("summonerName"), await self.getChampionName(self, player.get("champion")),
+            redTeamString += "{} - {} ({}/{}/{})\n".format(player.get("summonerName"), self.champNames.get(player.get("champion")),
                                                            player.get("kills"), player.get("deaths"), player.get("assists"))
         embed.add_field(name="<:red_circle:593788287974375455> RED TEAM <:red_circle:593788287974375455>", value=redTeamString, inline=False)
         if(blueTeam[0].get("win")):
