@@ -9,7 +9,8 @@ from discord.ext import commands
 
 HEADERS = {
     "Accept": "application/vnd.github.v3+json",
-    "Content-Type": "application/json"
+    "Content-Type": "application/json",
+    "User-Agent": "Chomusuke (+https://github.com/justalemon/Chomusuke)"
 }
 
 
