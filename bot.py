@@ -20,6 +20,8 @@ class Chomusuke(commands.AutoShardedBot):
             LOGGER.info("Initializing MongoDB from URL")
             # Create the MongoDB/Motor instance
             self.mongo = AsyncIOMotorClient(kwargs["database"])
+            # Make sure that the the database is valid
+            self.mongo.admin.command("ismaster")
             # Save the bot database
             self.database = self.mongo.chomusuke
             # And pop the argument
