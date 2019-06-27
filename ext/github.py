@@ -1,10 +1,8 @@
 # Import the commands extension
-import aiohttp
 import discord
 import logging
 import os
-
-from cog import Cog
+from ext.repo import Repo
 from discord.ext import commands
 
 # The list of endpoints that we are going to use
@@ -27,19 +25,34 @@ HEADERS = {
 LOGGER: logging.Logger = logging.getLogger("chomusuke")
 
 
-class Github(Cog):
+class GitHub(Repo):
     """
     A class containing commands/functions for Github Integration.
     """
-    def __init__(self, bot):
-        # Save our bot for later use
-        self.bot = bot
+    def __init__(self, *args, **kwargs):
+        # Call the normal function
+        super().__init__(*args, **kwargs)
+        # Add the commands to our group
+        self.github.add_command(self.repos)
 
-    async def fetch(self, session, url, params={}):
-        auth = aiohttp.BasicAuth(os.environ.get("AUTH_EMAIL"), os.environ.get("AUTH_PASS"))
-        session.auth = auth
-        async with session.get(url=url, headers=HEADERS, params=params) as response:
-            return await response.json()
+    async def format_repos(self, json: dict):
+        """
+        Formats the JSON response from a native AppVeyor response to a simple dict.
+        """
+        # Create an output dictionary
+        output = {}
+        # Iterate over the repos
+        for repo in json[0:15]:
+            # Save the slug and default branch
+            output[repo["full_name"]] = repo.get("language", "")
+        # Finally, return the output dictionary
+        return output
+
+    async def get_user(self):
+        """
+        Gets the GitHub user that corresponds for the Discord ID.
+        """
+        return "justalemon"
 
     @commands.group()
     async def github(self, ctx):
@@ -175,4 +188,4 @@ def setup(bot):
     """
     Our function called to add the cog to our bot.
     """
-    bot.add_cog(Github(bot))
+    bot.add_cog(GitHub(bot, "github", "token", HEADERS, ENDPOINTS))
