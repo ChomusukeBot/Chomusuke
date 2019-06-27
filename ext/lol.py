@@ -5,8 +5,6 @@ import os
 import requests
 from cog import Cog
 import json
-import pprint
-from datetime import datetime, timedelta
 
 # Base URL for all API calls
 BASE_URL = "https://{}.api.riotgames.com"
@@ -154,7 +152,7 @@ class LeagueCog(Cog):
         hours = (secs - days*86400)//3600
         minutes = (secs - days*86400 - hours*3600)//60
         seconds = secs - days*86400 - hours*3600 - minutes*60
-        result = (("{} days, ".format(days) if days else "") + ("{}:".format(hours) if hours else "") 
+        result = (("{} days, ".format(days) if days else "") + ("{}:".format(hours) if hours else "")
                   + ("{}".format(minutes) if minutes else "") + (":{} ".format(seconds) if seconds else ""))
         return result
 
@@ -214,10 +212,8 @@ class LeagueCog(Cog):
         matchTimeStamp = matchHistory.get("matches")[0].get("timestamp")
         # request match information
         matchData = await self.getMatchInformation(self, region, matchId)
-        print(matchData.get("queueId"))
         gameModeLeague = matchData.get("gameMode")
         gameMode = MATCHMAKING_QUEUES.get(matchData.get("queueId"))
-        print(gameMode)
         gameDuration = matchData.get("gameDuration")
         matchPlayers = []
         for player in (matchData.get("participants")):
@@ -243,7 +239,23 @@ class LeagueCog(Cog):
         # split players into teams
         blueTeam = matchPlayers[:5]
         redTeam = matchPlayers[5:]
-        embed = discord.Embed(title=gameinfo, description=("Game time: " + time))
+        embed = discord.Embed(title=gameinfo, description=("Game duration: " + time))
+        if(gameModeLeague == "CLASSIC"):
+            print("CLASSIC")
+        else:
+            embed.add_field(name="BLUE TEAM", value="\u200b", inline=True)
+            embed.add_field(name="RED TEAM", value="\u200b", inline=True)
+            embed.add_field(name="\u200b", value="\u200b", inline=True)
+            for player, player2 in zip(blueTeam, redTeam):
+                embed.add_field(name=player.get("summonerName"), value=(player.get("champion") + " - " + "{}/{}/{}".format(player.get("kills"),
+                                player.get("deaths"), player.get("assists"))), inline=True)
+                embed.add_field(name=player2.get("summonerName"), value=(player2.get("champion") + " - " + "{}/{}/{}".format(player2.get("kills"),
+                                player2.get("deaths"), player2.get("assists"))), inline=True)
+                embed.add_field(name="\u200b", value="\u200b", inline=True)
+            if(blueTeam[0].get("win")):
+                embed.set_footer(text="Blue team won!")
+            else:
+                embed.set_footer(text="Red team won!")
         await ctx.send(embed=embed)
 
 
