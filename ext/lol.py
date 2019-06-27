@@ -173,21 +173,21 @@ class LeagueCog(Cog):
         return result
 
     @commands.command(name='lolprofile', aliases=["lp"])
-    async def lolprofile(self, ctx, *args):
+    async def lolprofile(self, ctx, region, summonerName):
         """
         Generates an embed displaying the specified users LoL Profile.
         """
         # Check if the specified region is correct
-        if(args[0].lower() in REGIONS):
-            region = REGIONS.get(args[0].lower())
+        if(region.lower() in REGIONS):
+            region = REGIONS.get(region.lower())
         else:
             await ctx.send("Region not found. Use one of the following: \nBR, EUNE, EUW, JP, KR, LAN, LAS, NA, OCE, TR, RU, PBE")
             return
-        summoner = '{}'.format(' '.join(args[1:]))
+        summoner = summonerName
         # Request summoner data
         data = await self.getSummonerData(self, region, summoner)
         if not data:
-            await ctx.send("Summoner not found")
+            await ctx.send('Summoner not found. If using a multi-word summoner name remember to use quotation marks ""')
             return
         # Create an embed to display summoner data
         embed = discord.Embed(title=data.get("name"))
