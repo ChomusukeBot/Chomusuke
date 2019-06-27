@@ -6,7 +6,6 @@ import requests
 from cog import Cog
 import json
 import datetime
-import pprint
 
 # Base URL for all API calls
 BASE_URL = "https://{}.api.riotgames.com"
@@ -148,7 +147,7 @@ class LeagueCog(Cog):
     async def getMatchInformation(self, ctx, region, matchId):
         async with self.bot.session.get(BASE_URL.format(region) + MATCH_API.format(matchId, self.league_key)) as resp:
             return await resp.json()
-    
+
     async def getChampionName(self, ctx, championId):
         champions = json.loads(requests.get(CHAMPIONS_URL.format(self.league_ver)).text).get("data")
         for champ in champions:
@@ -273,7 +272,7 @@ class LeagueCog(Cog):
                             value=blueTeamString, inline=False)
             for player in redTeam:
                 redTeamString += "{} - {} ({}/{}/{})\n".format(player.get("summonerName"), await self.getChampionName(self, player.get("champion")),
-                                                                player.get("kills"), player.get("deaths"), player.get("assists"))
+                                                               player.get("kills"), player.get("deaths"), player.get("assists"))
             embed.add_field(name="<:red_circle:593788287974375455> RED TEAM <:red_circle:593788287974375455>", value=redTeamString, inline=False)
             if(blueTeam[0].get("win")):
                 embed.set_footer(text="Blue team won!")
