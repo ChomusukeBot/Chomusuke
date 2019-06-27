@@ -1,10 +1,13 @@
 # Import our little set of tools
 import argparse
 import asyncio
+import logging
 import os
 import sys
 from bot import Chomusuke
 from dotenv import load_dotenv
+
+LOGGER: logging.Logger = logging.getLogger("chomusuke")
 
 
 def main():
@@ -14,6 +17,7 @@ def main():
     # Start by creating our parser
     parser = argparse.ArgumentParser()
     parser.add_argument("--manual-env", dest="manual_env", action="store_true", help="if the .env file should be loaded manually by the bot")
+    parser.add_argument("--log", dest="log", action="store_false", help="if we should log the bot actions to stdout")
     # Parse our arguments
     args = parser.parse_args()
 
@@ -21,14 +25,27 @@ def main():
     if args.manual_env:
         load_dotenv()
 
-    # If the discord token is not on the environment variables
+    # If the user wants logging to stdout, configure the logger
+    if args.log:
+        # Set the logger level to info
+        LOGGER.setLevel(logging.INFO)
+        # Create a stream handler and also set it to info
+        stream = logging.StreamHandler()
+        stream.setLevel(logging.INFO)
+        # Create the formatter and add it into our handler
+        formatter = logging.Formatter("[%(asctime)s] [%(levelname)s] [%(filename)s] %(message)s")
+        stream.setFormatter(formatter)
+        # Finally, add the formatter to our logger
+        LOGGER.addHandler(stream)
+
+    # If the discord token is not on the environment variables, log and exit with a code 2
     if "DISCORD_TOKEN" not in os.environ:
-        # Exit with a code 2
+        LOGGER.critical("There is no Discord Token on the environment variables!")
         sys.exit(2)
 
-    # If the bot prefix is not on the environment variables
+    # If the bot prefix is not on the environment variables, log and exit with a code 2
     if "DISCORD_PREFIX" not in os.environ:
-        # Exit with a code 3
+        LOGGER.critical("There is no Bot Prefix on the environment variables!")
         sys.exit(3)
 
     # Create a dictionary of keyword arguments
