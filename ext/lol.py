@@ -208,7 +208,7 @@ class LeagueCog(Cog):
         await ctx.send(embed=embed)
 
     @commands.command(name='lolmatches', aliases=["lm"])
-    async def lolmatches(self, ctx, region, numberOfMatches, summonerName):
+    async def lolmatches(self, ctx, region, summonerName, numberOfMatches="1"):
         # Check if the specified region is correct
         if(region.lower() in REGIONS):
             region = REGIONS.get(region.lower())
