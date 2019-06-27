@@ -8,9 +8,9 @@ from discord.ext import commands
 
 
 headers = {
-            "Content-Type": "application/json",
-            "Accept": "application/json"
-        }
+    "Content-Type": "application/json",
+    "Accept": "application/json"
+}
 
 
 class Github(Cog):
@@ -19,7 +19,6 @@ class Github(Cog):
     """
     def __init__(self, bot):
         # Save our bot for later use
-        self.bot.http_session = aiohttp.ClientSession()
         self.bot = bot
 
     async def fetch(self, session, url, params={}):
@@ -45,12 +44,11 @@ class Github(Cog):
 
         """
         embed = discord.Embed(colour=discord.Colour.blue())
-        session = self.bot.http_session
         if author is None:
             embed = await self.search_repos(repo_name, 1)
         else:
             url = f"https://api.github.com/repos/{author}/{repo_name}"
-            data = await self.fetch(session, url)
+            data = await self.fetch(self.bot.session, url)
             if data["message"]:
                 return await ctx.send("Invalid Repository name or owner name!")
             embed.title = f"Name : {data['name']}"
@@ -81,8 +79,7 @@ class Github(Cog):
             "q": repo_name,
             "sort": "stars"
         }
-        session = self.bot.http_session
-        data = await self.fetch(session, url, params)
+        data = await self.fetch(self.bot.session, url, params)
         if data["total_count"] == 0:
             embed.title = "Repository not found!"
             return embed
@@ -124,9 +121,8 @@ class Github(Cog):
         """
         Gets the complete information about an issue.
         """
-        session = self.bot.http_session
         url = f"https://api.github.com/repos/{owner}/{repo}/issues/{issue_id}"
-        data = await self.fetch(session, url)
+        data = await self.fetch(self.bot.session, url)
         if data["message"]:
             return await ctx.send("Invalid Repository name or owner name or issue number!")
         embed = discord.Embed(colour=discord.Colour.blue())
@@ -151,9 +147,8 @@ class Github(Cog):
         """
         Gets all the labels in a repository.
         """
-        session = self.bot.http_session
         url = f"https://api.github.com/repos/{owner}/{repo}/labels"
-        data = await self.fetch(session, url)
+        data = await self.fetch(self.bot.session, url)
         embed = discord.Embed(colour=discord.Colour.blue())
         embed.title = "Labels"
         embed.description = ""
