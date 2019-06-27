@@ -1,4 +1,5 @@
 # Import the commands extension
+import logging
 from ext.ci import ContinuousIntegration
 from discord.ext import commands
 
@@ -18,6 +19,8 @@ HEADERS = {
     "Accept": "application/json",
     "User-Agent": "Chomusuke (+https://github.com/justalemon/Chomusuke)"
 }
+# The information logger
+LOGGER: logging.Logger = logging.getLogger("chomusuke")
 
 
 class AppVeyor(ContinuousIntegration):
@@ -71,4 +74,7 @@ def setup(bot):
     """
     Our function called to add the cog to our bot.
     """
-    bot.add_cog(AppVeyor(bot, "appveyor", "Bearer", HEADERS, ENDPOINTS))
+    if bot.mongo:
+        bot.add_cog(AppVeyor(bot, "appveyor", "Bearer", HEADERS, ENDPOINTS))
+    else:
+        LOGGER.error(f"{AppVeyor} has not been loaded because MongoDB is required")
