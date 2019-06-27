@@ -8,6 +8,7 @@ from cog import Cog
 BASE_URL = "https://api.steampowered.com"
 PROFILE_API = "/ISteamUser/GetPlayerSummaries/v0002/?key={}&steamids={}"
 CSGO_API = "/ISteamUserStats/GetUserStatsForGame/v0002/?appid=730&key={}&steamid={}"
+TFII_API = "/ISteamUserStats/GetUserStatsForGame/v0002/?appid=440&key={}&steamid={}"
 
 
 
@@ -26,6 +27,10 @@ class SteamCog(Cog):
 
     async def getCSData(self, ctx, profile):
         async with self.bot.session.get(BASE_URL + CSGO_API.format(self.steam_key, profile)) as resp:
+            return await resp.json()
+
+    async def getTFIIData(self, ctx, profile):
+        async with self.bot.session.get(BASE_URL + TFII_API.format(self.steam_key, profile)) as resp:
             return await resp.json()
 
 
@@ -82,6 +87,36 @@ class SteamCog(Cog):
         embed.add_field(name="Last match kills: ", value=str([x for x in data2["playerstats"]["stats"] if x["name"] == "last_match_kills"][0]["value"]), inline=True)
         embed.add_field(name="Last match deaths: ", value=str([x for x in data2["playerstats"]["stats"] if x["name"] == "last_match_deaths"][0]["value"]), inline=True)
         await ctx.send(embed=embed)
+
+
+
+    # make the command
+    @commands.command(name='tfii', aliases=["tf2"])
+    async def tfii(self, ctx, char):
+        """
+        embed displaying the specified user's stats for 
+        Team forteress II, needs steam id
+        """
+        # creates embeded profile
+        steamprofile = char
+        data = await self.getProfileData(self, steamprofile)
+        data3 = await self.getTFIIData(self, steamprofile)
+        #await ctx.send(data)
+        #await ctx.send(steamprofile)
+        if not data3:
+            await ctx.send("stats not found")
+            return
+        # do all the embed stuff
+        embed = discord.Embed(title=("TF II Stats for " + str(data.get("response").get("players")[0].get("personaname"))))
+        embed.set_thumbnail(url=(data.get("response").get("players")[0].get("avatarmedium")))
+        embed.add_field(name="Scout Kills: ", value=str([x for x in data3["playerstats"]["stats"] if x["name"] == "Scout.accum.iNumberOfKills"][0]["value"]), inline=True)
+        embed.add_field(name="Soldier Kills: ", value=str([x for x in data3["playerstats"]["stats"] if x["name"] == "Soldier.accum.iNumberOfKills"][0]["value"]), inline=True)
+        embed.add_field(name="Pyro Kills: ", value=str([x for x in data3["playerstats"]["stats"] if x["name"] == "Pyro.accum.iNumberOfKills"][0]["value"]), inline=True)
+        embed.add_field(name="Medic kills: ", value=str([x for x in data3["playerstats"]["stats"] if x["name"] == "Medic.accum.iNumberOfKills"][0]["value"]), inline=True)
+        embed.add_field(name="Engineer kills: ", value=str([x for x in data3["playerstats"]["stats"] if x["name"] == "Engineer.accum.iNumberOfKills"][0]["value"]), inline=True)
+        embed.add_field(name="Engineer sentry kills: ", value=str([x for x in data3["playerstats"]["stats"] if x["name"] == "Engineer.max.iSentryKills"][0]["value"]), inline=True)
+        await ctx.send(embed=embed)
+
 
 # setup the bot ith cog
 def setup(bot):
