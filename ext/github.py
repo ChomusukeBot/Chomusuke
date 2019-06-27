@@ -1,13 +1,10 @@
 # Import the commands extension
-import asyncio
-import os
-
 import aiohttp
-
+import asyncio
 import discord
-from discord.ext import commands
-
+import os
 from cog import Cog
+from discord.ext import commands
 
 
 headers = {
