@@ -219,7 +219,7 @@ class LeagueCog(Cog):
         # Request match information
         matchData = await self.getMatchInformation(self, region, matchId)
         # Grab important match data
-        gameModeLeague = matchData.get("gameMode")
+        # gameModeLeague = matchData.get("gameMode")
         gameMode = MATCHMAKING_QUEUES.get(matchData.get("queueId"))
         gameDuration = matchData.get("gameDuration")
         matchTimeStamp = matchData.get("gameCreation")
@@ -260,24 +260,21 @@ class LeagueCog(Cog):
             timeStamp = str(elapsedDays.days) + " days ago"
         # Embed creation
         embed = discord.Embed(title=(gameinfo + " ({})".format(timeStamp)), description=("Game duration: " + time), colour=0xEDB24C)
-        if(gameModeLeague == "CLASSIC"):
-            print("CLASSIC")
+        blueTeamString = ""
+        redTeamString = ""
+        for player in blueTeam:
+            blueTeamString += "{} - {} ({}/{}/{})\n".format(player.get("summonerName"), await self.getChampionName(self, player.get("champion")),
+                                                            player.get("kills"), player.get("deaths"), player.get("assists"))
+        embed.add_field(name="<:large_blue_circle:593787888861315078> BLUE TEAM <:large_blue_circle:593787888861315078>",
+                        value=blueTeamString, inline=False)
+        for player in redTeam:
+            redTeamString += "{} - {} ({}/{}/{})\n".format(player.get("summonerName"), await self.getChampionName(self, player.get("champion")),
+                                                           player.get("kills"), player.get("deaths"), player.get("assists"))
+        embed.add_field(name="<:red_circle:593788287974375455> RED TEAM <:red_circle:593788287974375455>", value=redTeamString, inline=False)
+        if(blueTeam[0].get("win")):
+            embed.set_footer(text="Blue team won!")
         else:
-            blueTeamString = ""
-            redTeamString = ""
-            for player in blueTeam:
-                blueTeamString += "{} - {} ({}/{}/{})\n".format(player.get("summonerName"), await self.getChampionName(self, player.get("champion")),
-                                                                player.get("kills"), player.get("deaths"), player.get("assists"))
-            embed.add_field(name="<:large_blue_circle:593787888861315078> BLUE TEAM <:large_blue_circle:593787888861315078>",
-                            value=blueTeamString, inline=False)
-            for player in redTeam:
-                redTeamString += "{} - {} ({}/{}/{})\n".format(player.get("summonerName"), await self.getChampionName(self, player.get("champion")),
-                                                               player.get("kills"), player.get("deaths"), player.get("assists"))
-            embed.add_field(name="<:red_circle:593788287974375455> RED TEAM <:red_circle:593788287974375455>", value=redTeamString, inline=False)
-            if(blueTeam[0].get("win")):
-                embed.set_footer(text="Blue team won!")
-            else:
-                embed.set_footer(text="Red team won!")
+            embed.set_footer(text="Red team won!")
         await ctx.send(embed=embed)
 
 
