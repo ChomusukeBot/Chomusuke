@@ -172,8 +172,8 @@ class LeagueOfLegends(Cog):
             await ctx.send("That region was not found. Please use one of the following:\n" + ", ".join(REGIONS.keys()))
             return
 
-        # Request summoner data
-        data = await self.get_summoner_data(self, region, summoner)
+        # Request the summoner data
+        data = await self.get_summoner_data(region, summoner)
         if not data:
             await ctx.send('Summoner not found. If using a multi-word summoner name remember to use quotation marks ""')
             return
@@ -328,26 +328,26 @@ class LeagueOfLegends(Cog):
                 embed.set_footer(text="Red team won! The values in parenthesis represent (Kill/Death/Assist)")
             await ctx.send(embed=embed)
 
-    async def get_summoner_data(self, ctx, region, summoner):
+    async def get_summoner_data(self, region, summoner):
         # Run the response as usual
         async with self.bot.session.get(BASE_URL.format(region) + SUMMONER_API.format(summoner, self.league_key)) as resp:
             if resp.status == 200:
                 return await resp.json()
             return
 
-    async def get_ranked_data(self, ctx, region, id):
+    async def get_ranked_data(self, region, id):
         async with self.bot.session.get(BASE_URL.format(region) + RANKED_API.format(id, self.league_key)) as resp:
             return await resp.json()
 
-    async def get_match_history(self, ctx, region, accountId, params):
+    async def get_match_history(self, region, accountId, params):
         async with self.bot.session.get(BASE_URL.format(region) + MATCHES_API.format(accountId, self.league_key), params=params) as resp:
             return await resp.json()
 
-    async def get_matchinformation(self, ctx, region, matchId):
+    async def get_match_information(self, region, matchId):
         async with self.bot.session.get(BASE_URL.format(region) + MATCH_API.format(matchId, self.league_key)) as resp:
             return await resp.json()
 
-    def get_player_string(self, ctx, player, lane, role):
+    def get_player_string(self, player, lane, role):
         if(player.get("lane") == lane):
             if(player.get("role") == role):
                 return "{} - {} ({}/{}/{})\n".format(player.get("summonerName"), self.champions.get(player.get("champion")),
@@ -357,7 +357,7 @@ class LeagueOfLegends(Cog):
         else:
             return ""
 
-    def seconds_to_text(ctx, secs):
+    def seconds_to_text(self, secs):
         days = secs//86400
         hours = (secs - days*86400)//3600
         minutes = (secs - days*86400 - hours*3600)//60
