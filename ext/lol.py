@@ -117,7 +117,7 @@ MATCHMAKING_QUEUES = {
 }
 
 
-class LeagueCog(Cog):
+class LeagueOfLegends(Cog):
     """
     A cog for accessing the League of Legends API.
     """
@@ -348,8 +348,8 @@ def setup(bot):
     """
     Our function called to add the cog to our bot.
     """
-    # Initial check to see if a league of legends api token exists in our enviroment
+    # Initial check to see if a League of Legends API Token exists in our enviroment
     if "LEAGUE_TOKEN" in os.environ:
-        bot.add_cog(LeagueCog(bot))
+        bot.add_cog(LeagueOfLegends(bot))
     else:
         print("No league api key available")
