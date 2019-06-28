@@ -12,8 +12,8 @@ RUST_API = "/ISteamUserStats/GetUserStatsForGame/v0002/?appid=252490&key={}&stea
 
 # cog stuff
 
-class Steam(Cog):
 
+class Steam(Cog):
 
     def __init__(self, bot):
         # save dat stuff 4 ltr
@@ -122,10 +122,10 @@ class Steam(Cog):
         embed.set_thumbnail(url=(data.get("response").get("players")[0].get(avt)))
         embed.add_field(name="Total Kills: ", value=str([x for x in data2[pso]["stats"] if x["name"] == ttlks][0]["value"]), inline=True)
         embed.add_field(name="Deaths: ", value=str([x for x in data2[pso]["stats"] if x["name"] == ttd][0]["value"]), inline=True)
-        embed.add_field(name="Kills by HS: ", value=str([x for x in data2[pso]["stats"] if x["name"] == tths ][0]["value"]), inline=True)
-        embed.add_field(name="Total damage done: ", value=str([x for x in data2[pso]["stats"] if x["name"] == dmg ][0]["value"]), inline=True)
-        embed.add_field(name="Last match kills: ", value=str([x for x in data2[pso]["stats"] if x["name"] == lks ][0]["value"]), inline=True)
-        embed.add_field(name="Last match deaths: ", value=str([x for x in data2[pso]["stats"] if x["name"] == lmd ][0]["value"]), inline=True)
+        embed.add_field(name="Kills by HS: ", value=str([x for x in data2[pso]["stats"] if x["name"] == tths][0]["value"]), inline=True)
+        embed.add_field(name="Total damage done: ", value=str([x for x in data2[pso]["stats"] if x["name"] == dmg][0]["value"]), inline=True)
+        embed.add_field(name="Last match kills: ", value=str([x for x in data2[pso]["stats"] if x["name"] == lks][0]["value"]), inline=True)
+        embed.add_field(name="Last match deaths: ", value=str([x for x in data2[pso]["stats"] if x["name"] == lmd][0]["value"]), inline=True)
 
         await ctx.send(embed=embed)
 
