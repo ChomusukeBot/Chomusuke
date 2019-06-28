@@ -150,8 +150,11 @@ class LeagueOfLegends(Cog):
                 # Save the champion name
                 new_champs[value["key"]] = value["name"]
 
-        # Finally replace the existing list of champions
+        # Replace the existing list of champions
         self.champions = new_champs
+
+        # Finally log what we have done
+        LOGGER.info("League of Legends Version and Champion list has been update")
 
     @commands.command(aliases=["lp"])
     async def lolprofile(self, ctx, region, summonerName):
