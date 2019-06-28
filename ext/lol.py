@@ -125,9 +125,8 @@ class LeagueOfLegends(Cog):
     def __init__(self, bot):
         # Save our bot for later use
         self.bot = bot
-        # Create some placeholders until the first update triggers
-        self.version = "9.13.1"
-        self.champions = {}
+        # Start the task to make sure that we have the values
+        self.update_values.start()
         # Save the league api key and the current league version
         self.league_key = os.environ["LEAGUE_TOKEN"]
 
