@@ -73,7 +73,7 @@ class APIStatus(Cog):
         riot_status = riot_status[:-2]
         if riot_status != "":
             riot_status = " - except " + riot_status
-        embed.add_field(name="League of Legends", value=f"{emoji1}{riot_status}", inline=True)
+        embed.add_field(name="League of Legends API", value=f"{emoji1}{riot_status}", inline=True)
         await ctx.send(embed=embed)
 
 
