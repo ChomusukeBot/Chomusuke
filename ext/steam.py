@@ -56,15 +56,21 @@ class SteamCog(Cog):
         # creates embeded profile
         steamprofile = char
         data = await self.getProfileData(self, steamprofile)
-        #await ctx.send(data)
-        #await ctx.send(steamprofile)
+
+        #create var for checking
+        loccode = str(data.get("response").get("players")[0].get("locstatecode"))
         if not data:
             await ctx.send("profile not found")
             return
         # do all the embed stuff
-        embed = discord.Embed(title=("Real name: " + (data.get("response").get("players")[0].get("realname"))))      
-        embed.set_author(name=("Name:" + str(data.get("response").get("players")[0].get("personaname"))))
-        embed.add_field(name='country code:', value=data.get("response").get("players")[0].get("locstatecode"), inline=True) 
+        if data.get(loccode == None):
+            embed = discord.Embed(title=("Real name: " + (data.get("response").get("players")[0].get("realname"))))      
+            embed.set_author(name=("Name:" + str(data.get("response").get("players")[0].get("personaname"))))
+             
+        else:
+            embed = discord.Embed(title=("Real name: " + (data.get("response").get("players")[0].get("realname"))))      
+            embed.set_author(name=("Name:" + str(data.get("response").get("players")[0].get("personaname"))))
+            embed.add_field(name='country code:', value=data.get("response").get("players")[0].get("loccountrycode"), inline=True)
         
         embed.set_thumbnail(url=(data.get("response").get("players")[0].get("avatarmedium")))
         await ctx.send(embed=embed)
