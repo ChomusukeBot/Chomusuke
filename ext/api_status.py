@@ -30,8 +30,8 @@ class APIStatus(Cog):
         self.bot = bot
         self.http_session = aiohttp.ClientSession()
 
-    @commands.command(name="apistatus", aliases=["api", "status"])
-    async def get_api_status(self, ctx):
+    @commands.command()
+    async def status(self, ctx):
         # guild = self.bot.get_guild(591570953771810820)
         await ctx.send("Fetching status...this may take some time.")
         emoji1 = "\U00002705"
