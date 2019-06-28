@@ -1,5 +1,4 @@
 # Import the commands extension
-import aiohttp
 import discord
 import os
 from cog import Cog
@@ -28,7 +27,6 @@ class APIStatus(Cog):
     def __init__(self, bot):
         # Save our bot for later use
         self.bot = bot
-        self.http_session = aiohttp.ClientSession()
 
     @commands.command()
     async def status(self, ctx):
@@ -41,7 +39,7 @@ class APIStatus(Cog):
         embed = discord.Embed(colour=discord.Colour.blue())
         embed.title = "API statuses"
         for key, value in APIs.items():
-            async with self.http_session.get(url=value) as response:
+            async with self.bot.session.get(url=value) as response:
                 print(response.status)
                 if response.status == 200:
                     embed.add_field(name=f"{key} API", value=emoji1, inline=True)
@@ -49,7 +47,7 @@ class APIStatus(Cog):
                     embed.add_field(name=f"{key} API", value=emoji2, inline=True)
         for key, value in REGIONS.items():
             url = BASE_URL.format(value) + SHARD_STATUS_URL.format(ALL_AUTH["api_key"])
-            async with self.http_session.get(url=url) as response:
+            async with self.bot.session.get(url=url) as response:
                 print(response.status)
                 if response.status == 200:
                     pass
