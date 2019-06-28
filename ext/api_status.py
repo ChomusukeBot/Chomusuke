@@ -4,6 +4,8 @@ import discord
 import os
 from cog import Cog
 from discord.ext import commands
+from ext.lol import REGIONS
+
 
 APIs = {
     "github": "https://api.github.com/zen",
@@ -12,28 +14,11 @@ APIs = {
     "overwatch": "https://overwatchy.com/"
 }
 ALL_AUTH = {
-    # "client_id": os.environ.get("GITHUB_ID"),
-    # "client_secret": os.environ.get("GITHUB_SECRET"),
     "api_key": os.environ.get("LEAGUE_TOKEN")
 }
 
 BASE_URL = "https://{}.api.riotgames.com"
 SHARD_STATUS_URL = "/lol/status/v3/shard-data?api_key={}"
-
-RIOT_REGIONS = {
-    "br": "br1",
-    "eune": "eun1",
-    "euw": "euw1",
-    "jp": "jp1",
-    "kr": "kr",
-    "lan": "la1",
-    "las": "la2",
-    "na": "na1",
-    "oce": "oc1",
-    "tr": "tr1",
-    "ru": "ru",
-    "pbe": "pbe1"
-}
 
 
 class APIStatus(Cog):
@@ -62,7 +47,7 @@ class APIStatus(Cog):
                     embed.add_field(name=f"{key} API", value=emoji1, inline=True)
                 else:
                     embed.add_field(name=f"{key} API", value=emoji2, inline=True)
-        for key, value in RIOT_REGIONS.items():
+        for key, value in REGIONS.items():
             url = BASE_URL.format(value) + SHARD_STATUS_URL.format(ALL_AUTH["api_key"])
             async with self.http_session.get(url=url) as response:
                 print(response.status)
