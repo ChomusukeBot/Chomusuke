@@ -1,10 +1,12 @@
 # Import the commands extension
+import asyncio
 import datetime
 import discord
 import logging
 import os
 from cog import Cog
-from discord.ext import commands, tasks
+from discord.ext import commands
+import typing
 
 # The color of the embeds
 COLOR = 0xEDB24C
@@ -19,7 +21,7 @@ SUMMONER_API = "/lol/summoner/v4/summoners/by-name/{}?api_key={}"
 # API Operation used to access summoner ranked data
 RANKED_API = "/lol/league/v4/entries/by-summoner/{}?api_key={}"
 # API Operation used to access summoner match history
-MATCHES_API = "/lol/match/v4/matchlists/by-account/{}?api_key={}&endIndex=1"
+MATCHES_API = "/lol/match/v4/matchlists/by-account/{}?api_key={}"
 # API Operation used to access a specific match
 MATCH_API = "/lol/match/v4/matches/{}?api_key={}"
 # A .json file storing the current and all previous versions of league of legends
@@ -128,35 +130,39 @@ class LeagueOfLegends(Cog):
         # Save our bot for later use
         self.bot = bot
         # Start the task to make sure that we have the values
-        self.update_values.start()
+        self.bot.loop.create_task(self.update_values())
         # Save the league api key and the current league version
         self.league_key = os.environ["LEAGUE_TOKEN"]
 
-    @tasks.loop(hours=1)
     async def update_values(self):
         """
         Task that updates the version and list of champions every hour.
         """
-        # Request the list of versions
-        async with self.bot.session.get(LEAGUE_VERSION) as resp:
-            # Parse the response as JSON and save the version
-            self.version = (await resp.json(content_type="binary/octet-stream"))[0]
+        # While the bot is not closed
+        while not self.bot.is_closed():
+            # Request the list of versions
+            async with self.bot.session.get(LEAGUE_VERSION) as resp:
+                # Parse the response as JSON and save the version
+                self.version = (await resp.json(content_type=None))[0]
 
-        # Create an empty dict with the character data
-        new_champs = {}
+            # Create an empty dict with the character data
+            new_champs = {}
 
-        # Request the list of champions on the current version
-        async with self.bot.session.get(CHAMPIONS_URL.format(self.version)) as resp:
-            # Iterate over the characters on the response (but parse it first)
-            for key, value in (await resp.json())["data"].items():
-                # Save the champion name
-                new_champs[value["key"]] = value["name"]
+            # Request the list of champions on the current version
+            async with self.bot.session.get(CHAMPIONS_URL.format(self.version)) as resp:
+                # Iterate over the characters on the response (but parse it first)
+                for key, value in (await resp.json())["data"].items():
+                    # Save the champion name
+                    new_champs[value["key"]] = value["name"]
 
-        # Replace the existing list of champions
-        self.champions = new_champs
+            # Replace the existing list of champions
+            self.champions = new_champs
 
-        # Finally log what we have done
-        LOGGER.info("League of Legends Version and Champion list has been update")
+            # Finally log what we have done
+            LOGGER.info("League of Legends Version and Champion list has been update")
+
+            # And wait an hour (60 seconds * 60 minutes = 1 hour)
+            await asyncio.sleep(60 * 60)
 
     @commands.group()
     async def lol(self, ctx):
@@ -201,9 +207,10 @@ class LeagueOfLegends(Cog):
         await ctx.send(embed=embed)
 
     @lol.command(aliases=["m"])
-    async def match(self, ctx, region, *, summoner):
+    async def match(self, ctx, region, prevMatch: typing.Optional[int] = 0, *, summoner):
         """
-        Shows the match history of the specified summoner up to a maximum of 5.
+        Shows the match details of the specified summoner's match.
+        Use prevMatch to select which match you want to see (0 being the latest one).
         """
         # If the specific region is not on our dictionary, notify and return
         if not region.lower() in REGIONS:
@@ -221,9 +228,9 @@ class LeagueOfLegends(Cog):
         region = REGIONS[region.lower()]
 
         # Get the match history
-        async with self.bot.session.get(BASE_URL.format(region) + MATCHES_API.format(data["accountId"], self.league_key)) as resp:
+        params = {"endIndex": prevMatch+1, "beginIndex": prevMatch}
+        async with self.bot.session.get(BASE_URL.format(region) + MATCHES_API.format(data["accountId"], self.league_key), params=params) as resp:
             history = await resp.json()
-
         # Iterate over the matches on the response
         for match_meta in history["matches"]:
             # Request the match information

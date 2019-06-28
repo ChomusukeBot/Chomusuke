@@ -133,19 +133,24 @@ class Repo(Cog):
         # Create a list of headers
         headers = await self.generate_headers(ctx)
 
-        # Request the list of user repos
-        async with self.bot.session.get(self.endpoints["repos"], headers=headers) as resp:
-            # If we didn't got a code 200, notify the user and return
-            if resp.status != 200:
-                await ctx.send(f"Unable to get your list of repos: Code {resp.status}")
-                return
-            # Parse the response as JSON
-            json = await resp.json()
+        # If there is a function to check the repo
+        if getattr(self, "check_repo", None):
+            picks = await self.check_repo(slug)
+        # Otherwise
+        else:
+            # Request the list of user repos
+            async with self.bot.session.get(self.endpoints["repos"], headers=headers) as resp:
+                # If we didn't got a code 200, notify the user and return
+                if resp.status != 200:
+                    await ctx.send(f"Unable to get your list of repos: Code {resp.status}")
+                    return
+                # Parse the response as JSON
+                json = await resp.json()
 
-        # Format the repos returned by the response
-        output = await self.format_repos(json)
-        # Filter the picks
-        picks = {k: v for k, v in output.items() if slug.casefold() == k.casefold()}
+            # Format the repos returned by the response
+            output = await self.format_repos(json)
+            # Filter the picks
+            picks = {k: v for k, v in output.items() if slug.casefold() == k.casefold()}
 
         # If there was no matches
         if not picks:
