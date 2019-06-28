@@ -6,6 +6,7 @@ import logging
 import os
 from cog import Cog
 from discord.ext import commands
+import typing
 
 # The color of the embeds
 COLOR = 0xEDB24C
@@ -20,7 +21,7 @@ SUMMONER_API = "/lol/summoner/v4/summoners/by-name/{}?api_key={}"
 # API Operation used to access summoner ranked data
 RANKED_API = "/lol/league/v4/entries/by-summoner/{}?api_key={}"
 # API Operation used to access summoner match history
-MATCHES_API = "/lol/match/v4/matchlists/by-account/{}?api_key={}&endIndex=1"
+MATCHES_API = "/lol/match/v4/matchlists/by-account/{}?api_key={}"
 # API Operation used to access a specific match
 MATCH_API = "/lol/match/v4/matches/{}?api_key={}"
 # A .json file storing the current and all previous versions of league of legends
@@ -206,7 +207,7 @@ class LeagueOfLegends(Cog):
         await ctx.send(embed=embed)
 
     @lol.command(aliases=["m"])
-    async def match(self, ctx, region, *, summoner):
+    async def match(self, ctx, region, prevMatch: typing.Optional[int] = 0, *, summoner):
         """
         Shows the match history of the specified summoner up to a maximum of 5.
         """
@@ -226,9 +227,9 @@ class LeagueOfLegends(Cog):
         region = REGIONS[region.lower()]
 
         # Get the match history
-        async with self.bot.session.get(BASE_URL.format(region) + MATCHES_API.format(data["accountId"], self.league_key)) as resp:
+        params = {"endIndex": prevMatch+1, "beginIndex": prevMatch}
+        async with self.bot.session.get(BASE_URL.format(region) + MATCHES_API.format(data["accountId"], self.league_key), params=params) as resp:
             history = await resp.json()
-
         # Iterate over the matches on the response
         for match_meta in history["matches"]:
             # Request the match information
