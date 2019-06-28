@@ -6,7 +6,7 @@ import json
 import os
 import requests
 from cog import Cog
-from discord.ext import commands
+from discord.ext import commands, tasks
 
 # Base URL for all API calls
 BASE_URL = "https://{}.api.riotgames.com"
@@ -129,13 +129,22 @@ class LeagueOfLegends(Cog):
         self.bot = bot
         # Save the league api key and the current league version
         self.league_key = os.environ["LEAGUE_TOKEN"]
-        self.league_ver = requests.get(LEAGUE_VERSION).json()[0]
         # Save the champion names and champion keys for faster access
-        champions = json.loads(requests.get(CHAMPIONS_URL.format(self.league_ver)).text).get("data")
+        champions = json.loads(requests.get(CHAMPIONS_URL.format(self.version)).text).get("data")
         champNames = {}
         for champ in champions:
             champNames[champions.get(champ).get("key")] = champions.get(champ).get("id")
         self.champNames = champNames
+
+    @tasks.loop(hours=1)
+    async def update_values(self):
+        """
+        Task that updates the version and list of champions every hour.
+        """
+        # Request the list of versions
+        async with self.bot.session.get(LEAGUE_VERSION) as resp:
+            # Parse the response as JSON and save the version
+            self.version = await resp.json()[0]
 
     @commands.command(aliases=["lp"])
     async def lolprofile(self, ctx, region, summonerName):
@@ -157,7 +166,7 @@ class LeagueOfLegends(Cog):
         # Create an embed to display summoner data
         embed = discord.Embed(title=data.get("name"))
         embed.set_author(name=("Summoner Level - " + str(data.get("summonerLevel"))))
-        embed.set_thumbnail(url=PROFILE_IMAGE_URL.format(self.league_ver, data.get("profileIconId")))
+        embed.set_thumbnail(url=PROFILE_IMAGE_URL.format(self.version, data.get("profileIconId")))
         # Request the summoner ranked data
         summonerId = data.get("id")
         rankData = await self.getSummonerRankedData(self, region, summonerId)
