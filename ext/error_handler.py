@@ -5,7 +5,7 @@ from cog import Cog
 from discord.ext import commands
 
 
-logger = logging.getLogger('chomusuke')
+logger = logging.getLogger("chomusuke")
 
 
 class ErrorHandler(Cog):
