@@ -209,7 +209,8 @@ class LeagueOfLegends(Cog):
     @lol.command(aliases=["m"])
     async def match(self, ctx, region, prevMatch: typing.Optional[int] = 0, *, summoner):
         """
-        Shows the match history of the specified summoner up to a maximum of 5.
+        Shows the match details of the specified summoner's match.
+        Use prevMatch to select which match you want to see (0 being the latest one).
         """
         # If the specific region is not on our dictionary, notify and return
         if not region.lower() in REGIONS:
