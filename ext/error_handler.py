@@ -23,23 +23,23 @@ class ErrorHandler(Cog):
         if isinstance(error, commands.CommandNotFound):
             return logger.info(f"{ctx.author} used {ctx.message.content} but nothing was found.")
 
-        elif isinstance(error, commands.MissingRequiredArgument):
+        if isinstance(error, commands.MissingRequiredArgument):
             logger.info(f"{ctx.author} called {ctx.message.content} and triggered MissingRequiredArgument error.")
             return await ctx.send(f"`{error.param}` is a required argument.")
 
-        elif isinstance(error, commands.CheckFailure):
+        if isinstance(error, commands.CheckFailure):
             logger.info(f"{ctx.author} called {ctx.message.content} and triggered CheckFailure error.")
             return await ctx.send("You do not have permission to use this command!")
 
-        elif isinstance(error, commands.UserInputError) or isinstance(error, commands.BadArgument):
+        if isinstance(error, (commands.UserInputError, commands.BadArgument)):
             logger.info(f"{ctx.author} called {ctx.message.content} and triggered UserInputError error.")
             return await ctx.send("Invalid arguments.")
 
-        elif isinstance(error, commands.CommandOnCooldown):
+        if isinstance(error, commands.CommandOnCooldown):
             logger.info(f"{ctx.author} called {ctx.message.content} and triggered ComamndOnCooldown error.")
             return await ctx.send(f"Command is on cooldown! Please retry after `{error.retry_after}`")
 
-        elif isinstance(error, commands.BotMissingPermissions):
+        if isinstance(error, commands.BotMissingPermissions):
             logger.info(f"{ctx.author} called {ctx.message.content} and triggered BotMissingPermissions error.")
             embed = discord.Embed()
             embed.colour = discord.Colour.blue()
@@ -50,12 +50,11 @@ class ErrorHandler(Cog):
                 embed.description += str(perm)
             return await ctx.send(embed=embed)
 
-        elif isinstance(error, commands.DisabledCommand):
+        if isinstance(error, commands.DisabledCommand):
             logger.info(f"{ctx.author} called {ctx.message.content} and triggered DisabledCommand error.")
             return await ctx.send("The command has been disabled!")
 
-        else:
-            logger.warning(f"{ctx.author} called {ctx.message.content} and triggered the following error:\n {error}")
+        logger.warning(f"{ctx.author} called {ctx.message.content} and triggered the following error:\n {error}")
 
 
 def setup(bot):
