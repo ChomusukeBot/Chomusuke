@@ -194,7 +194,7 @@ class LeagueCog(Cog):
             numberOfMatches = str(1)
         accountId = data.get("accountId")
         # Request the match history of the summoner
-        params = 'endIndex='+numberOfMatches
+        params = "endIndex="+numberOfMatches
         matchHistory = await self.getSummonerMatchHistory(self, region, accountId, params)
         # Create an embed for each match
         for match in matchHistory.get("matches"):
