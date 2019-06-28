@@ -14,6 +14,7 @@ RUST_API = "/ISteamUserStats/GetUserStatsForGame/v0002/?appid=252490&key={}&stea
 
 class Steam(Cog):
 
+
     def __init__(self, bot):
         # save dat stuff 4 ltr
         self.bot = bot
@@ -61,7 +62,7 @@ class Steam(Cog):
         embed = discord.Embed(title=("Real name: " + (data.get("response").get("players")[0].get("realname"))))
         embed.set_author(name=("Name:" + str(data.get("response").get("players")[0].get("personaname"))))
         embed.add_field(name="country code:", value=data.get("response").get("players")[0].get("loccountrycode"), inline=True)
-        
+
         embed.set_thumbnail(url=(data.get("response").get("players")[0].get("avatarmedium")))
         await ctx.send(embed=embed)
 
@@ -100,6 +101,16 @@ class Steam(Cog):
         steamprofile = char
         data = await self.getProfileData(self, steamprofile)
         data2 = await self.getCSData(self, steamprofile)
+        # vars to shorten embeds
+        yrnm = "personaname"
+        avt = "avatarmedium"
+        ttlks = "total_kills"
+        ttd = "total_deaths"
+        tths = "total_kills_headshot"
+        dmg = "total_damage_done"
+        lks = "last_match_kills"
+        lmd = "last_match_deaths"
+        pso = "playerstats"
         # await ctx.send(data)
         # await ctx.send(steamprofile)
         if not data2:
@@ -107,14 +118,14 @@ class Steam(Cog):
             return
 
         # embed and send embeded
-        embed = discord.Embed(title=("CSGO Stats for " + str(data.get("response").get("players")[0].get("personaname"))))
-        embed.set_thumbnail(url=(data.get("response").get("players")[0].get("avatarmedium")))
-        embed.add_field(name="Total Kills: ", value=str([x for x in data2["playerstats"]["stats"] if x["name"] == "total_kills"][0]["value"]), inline=True)
-        embed.add_field(name="Deaths: ", value=str([x for x in data2["playerstats"]["stats"] if x["name"] == "total_deaths"][0]["value"]), inline=True)
-        embed.add_field(name="Kills by HS: ", value=str([x for x in data2["playerstats"]["stats"] if x["name"] == "total_kills_headshot"][0]["value"]), inline=True)
-        embed.add_field(name="Total damage done: ", value=str([x for x in data2["playerstats"]["stats"] if x["name"] == "total_damage_done"][0]["value"]), inline=True)
-        embed.add_field(name="Last match kills: ", value=str([x for x in data2["playerstats"]["stats"] if x["name"] == "last_match_kills"][0]["value"]), inline=True)
-        embed.add_field(name="Last match deaths: ", value=str([x for x in data2["playerstats"]["stats"] if x["name"] == "last_match_deaths"][0]["value"]), inline=True)
+        embed = discord.Embed(title=("CSGO Stats for " + str(data.get("response").get("players")[0].get(yrnm))))
+        embed.set_thumbnail(url=(data.get("response").get("players")[0].get(avt)))
+        embed.add_field(name="Total Kills: ", value=str([x for x in data2[pso]["stats"] if x["name"] == ttlks][0]["value"]), inline=True)
+        embed.add_field(name="Deaths: ", value=str([x for x in data2[pso]["stats"] if x["name"] == ttd][0]["value"]), inline=True)
+        embed.add_field(name="Kills by HS: ", value=str([x for x in data2[pso]["stats"] if x["name"] == tths ][0]["value"]), inline=True)
+        embed.add_field(name="Total damage done: ", value=str([x for x in data2[pso]["stats"] if x["name"] == dmg ][0]["value"]), inline=True)
+        embed.add_field(name="Last match kills: ", value=str([x for x in data2[pso]["stats"] if x["name"] == lks ][0]["value"]), inline=True)
+        embed.add_field(name="Last match deaths: ", value=str([x for x in data2[pso]["stats"] if x["name"] == lmd ][0]["value"]), inline=True)
 
         await ctx.send(embed=embed)
 
@@ -130,7 +141,13 @@ class Steam(Cog):
         steamprofile = char
         data = await self.getProfileData(self, steamprofile)
         data3 = await self.getTFIIData(self, steamprofile)
-
+        ps = "playerstats"
+        snm = "Scout.accum.iNumberOfKills"
+        solnm = "Soldier.accum.iNumberOfKills"
+        pnm = "Pyro.accum.iNumberOfKills"
+        mnm = "Medic.accum.iNumberOfKills"
+        enm = "Scout.accum.iNumberOfKills"
+        etnm = "Engineer.max.iSentryKills"
         if not data3:
             await ctx.send("stats not found")
             return
@@ -138,19 +155,19 @@ class Steam(Cog):
         # do all the embed stuff
         embed = discord.Embed(title=("TF II Stats for " + str(data.get("response").get("players")[0].get("personaname"))))
         embed.set_thumbnail(url=(data.get("response").get("players")[0].get("avatarmedium")))
-        embed.add_field(name="Scout kills: ", value=str([x for x in data3["playerstats"]["stats"] if x["name"] == "Scout.accum.iNumberOfKills"][0]["value"]), inline=True)
-        embed.add_field(name="Soldier kills: ", value=str([x for x in data3["playerstats"]["stats"] if x["name"] == "Soldier.accum.iNumberOfKills"][0]["value"]), inline=True)
-        embed.add_field(name="Pyro kills: ", value=str([x for x in data3["playerstats"]["stats"] if x["name"] == "Pyro.accum.iNumberOfKills"][0]["value"]), inline=True)
-        embed.add_field(name="Medic kills: ", value=str([x for x in data3["playerstats"]["stats"] if x["name"] == "Medic.accum.iNumberOfKills"][0]["value"]), inline=True)
-        embed.add_field(name="Engineer kills: ", value=str([x for x in data3["playerstats"]["stats"] if x["name"] == "Engineer.accum.iNumberOfKills"][0]["value"]), inline=True)
-        embed.add_field(name="Engineer sentry kills: ", value=str([x for x in data3["playerstats"]["stats"] if x["name"] == "Engineer.max.iSentryKills"][0]["value"]), inline=True)
+        embed.add_field(name="Scout kills: ", value=str([x for x in data3[ps]["stats"] if x["name"] == snm][0]["value"]), inline=True)
+        embed.add_field(name="Soldier kills: ", value=str([x for x in data3[ps]["stats"] if x["name"] == solnm][0]["value"]), inline=True)
+        embed.add_field(name="Pyro kills: ", value=str([x for x in data3[ps]["stats"] if x["name"] == pnm][0]["value"]), inline=True)
+        embed.add_field(name="Medic kills: ", value=str([x for x in data3[ps]["stats"] if x["name"] == mnm][0]["value"]), inline=True)
+        embed.add_field(name="Engineer kills: ", value=str([x for x in data3[ps]["stats"] if x["name"] == enm][0]["value"]), inline=True)
+        embed.add_field(name="Engineer sentry kills: ", value=str([x for x in data3[ps]["stats"] if x["name"] == etnm][0]["value"]), inline=True)
         await ctx.send(embed=embed)
 
     # make the command
     @commands.command(name="rust", aliases=["rst"])
     async def rust(self, ctx, char):
         """
-        embed displaying the specified user's stats for 
+        embed displaying the specified user's stats for
         Rust
         ex: rust [steam id code]
         """
@@ -159,6 +176,8 @@ class Steam(Cog):
         data = await self.getProfileData(self, steamprofile)
         data4 = await self.getRustData(self, steamprofile)
 
+        psi = "playerstats"
+
         if not data4:
             await ctx.send("stats not found")
             return
@@ -166,10 +185,10 @@ class Steam(Cog):
         # do all the embed stuff
         embed = discord.Embed(title=("Rust Stats for " + str(data.get("response").get("players")[0].get("personaname"))))
         embed.set_thumbnail(url=(data.get("response").get("players")[0].get("avatarmedium")))
-        embed.add_field(name="Deaths: ", value=str([x for x in data4["playerstats"]["stats"] if x["name"] == "deaths"][0]["value"]), inline=True)
-        embed.add_field(name="Kills: ", value=str([x for x in data4["playerstats"]["stats"] if x["name"] == "kill_player"][0]["value"]), inline=True)
-        embed.add_field(name="Mele strikes: ", value=str([x for x in data4["playerstats"]["stats"] if x["name"] == "melee_strikes"][0]["value"]), inline=True)
-        embed.add_field(name="Wounds: ", value=str([x for x in data4["playerstats"]["stats"] if x["name"] == "wounded"][0]["value"]), inline=True)
+        embed.add_field(name="Deaths: ", value=str([x for x in data4[psi]["stats"] if x["name"] == "deaths"][0]["value"]), inline=True)
+        embed.add_field(name="Kills: ", value=str([x for x in data4[psi]["stats"] if x["name"] == "kill_player"][0]["value"]), inline=True)
+        embed.add_field(name="Mele strikes: ", value=str([x for x in data4[psi]["stats"] if x["name"] == "melee_strikes"][0]["value"]), inline=True)
+        embed.add_field(name="Wounds: ", value=str([x for x in data4[psi]["stats"] if x["name"] == "wounded"][0]["value"]), inline=True)
         await ctx.send(embed=embed)
 
 
