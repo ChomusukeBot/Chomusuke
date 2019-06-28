@@ -21,7 +21,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--manual-env", dest="manual_env", action="store_true", help="if the .env file should be loaded manually by the bot")
     parser.add_argument("--log", dest="log", action="store_false", help="if we should log the bot actions to stdout")
-    parser.add_argument("--web", dest="web", action="store_false", help="disable the launch of the web server")
+    parser.add_argument("--no-web", dest="web", action="store_false", help="disable the launch of the web server")
     # Parse our arguments
     args = parser.parse_args()
 
