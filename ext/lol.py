@@ -260,8 +260,10 @@ class LeagueOfLegends(Cog):
                 timeStamp = "1 day ago"
             else:
                 timeStamp = str(elapsedDays.days) + " days ago"
-            # Embed creation
-            embed = discord.Embed(title=(mode + " ({})".format(timeStamp)), description=("Game duration: " + time), colour=0xEDB24C)
+
+            # Create the embed to add the data
+            embed = discord.Embed(title=mode + " ({})".format(timeStamp), description="Game duration: " + time, color=COLOR)
+
             # Sort players by their lanes if possible, else just put them in randomly
             blueTeamSorted = ""
             blueTeamString = ""
