@@ -4,27 +4,21 @@ from discord.ext import commands
 import os
 from cog import Cog
 
-
 BASE_URL = "https://api.steampowered.com"
 PROFILE_API = "/ISteamUser/GetPlayerSummaries/v0002/?key={}&steamids={}"
 CSGO_API = "/ISteamUserStats/GetUserStatsForGame/v0002/?appid=730&key={}&steamid={}"
 TFII_API = "/ISteamUserStats/GetUserStatsForGame/v0002/?appid=440&key={}&steamid={}"
 RUST_API = "/ISteamUserStats/GetUserStatsForGame/v0002/?appid=252490&key={}&steamid={}"
 
-
-
 # cog stuff
-class SteamCog(Cog):
-    """
-    a cog for steam stats for various games
-    """
+class Steam(Cog):
+
     def __init__(self, bot):
         # save dat stuff 4 ltr
         self.bot = bot
         self.steam_key = os.environ["STEAM_TOKEN"]
 
-#GET DATA
-
+    #DATAHELP
     #profile
     async def getProfileData(self, ctx, profile):
         async with self.bot.session.get(BASE_URL + PROFILE_API.format(self.steam_key, profile)) as resp:
@@ -45,8 +39,7 @@ class SteamCog(Cog):
         async with self.bot.session.get(BASE_URL + RUST_API.format(self.steam_key, profile)) as resp:
             return await resp.json()
 
-
-
+    #COMMANDS
     # PROFILE COMMAND
     @commands.command(name='profile', aliases=["myp"])
     async def profile(self, ctx, char):
@@ -64,13 +57,12 @@ class SteamCog(Cog):
             return
         # do all the embed stuff
 
-            embed = discord.Embed(title=("Real name: " + (data.get("response").get("players")[0].get("realname"))))      
-            embed.set_author(name=("Name:" + str(data.get("response").get("players")[0].get("personaname"))))
-            embed.add_field(name='country code:', value=data.get("response").get("players")[0].get("loccountrycode"), inline=True)
+        embed = discord.Embed(title=("Real name: " + (data.get("response").get("players")[0].get("realname"))))         
+        embed.set_author(name=("Name:" + str(data.get("response").get("players")[0].get("personaname"))))
+        embed.add_field(name='country code:', value=data.get("response").get("players")[0].get("loccountrycode"), inline=True)
         
         embed.set_thumbnail(url=(data.get("response").get("players")[0].get("avatarmedium")))
         await ctx.send(embed=embed)
-
 
     #PROFILE SEARCH Command
     @commands.command(name="inprofile", aliases=["fip"])
@@ -97,7 +89,6 @@ class SteamCog(Cog):
         await ctx.send(embed=embed)
 
 
-
     #CSGO Command
     @commands.command(name="csgo", aliases=["csg"])
     async def csgo(self, ctx, char):
@@ -114,9 +105,6 @@ class SteamCog(Cog):
         if not data2:
             await ctx.send("stats not found")
             return
-        #IGNORE non working vars:
-        #kills = str([x for x in data2["playerstats"]["stats"] if x["name"] == ["total_kills"][0]["value"]])
-        #deaths = str([x for x in data2["playerstats"]["stats"] if x["name"] == ["total_deaths"][0]["value"]])
 
         # embed and send embeded
         embed = discord.Embed(title=("CSGO Stats for " + str(data.get("response").get("players")[0].get("personaname"))))
@@ -129,8 +117,6 @@ class SteamCog(Cog):
         embed.add_field(name="Last match deaths: ", value=str([x for x in data2["playerstats"]["stats"] if x["name"] == "last_match_deaths"][0]["value"]), inline=True)
         
         await ctx.send(embed=embed)
-
-
 
     # TEAM FORTERESS TWO command
     @commands.command(name='tfii', aliases=["tf2"])
@@ -161,9 +147,6 @@ class SteamCog(Cog):
         await ctx.send(embed=embed)
 
 
-
-
-
     # make the command
     @commands.command(name='rust', aliases=["rst"])
     async def rust(self, ctx, char):
@@ -191,14 +174,13 @@ class SteamCog(Cog):
         await ctx.send(embed=embed)
 
 
-
-
 # setup the bot ith cog
 def setup(bot):
 
     if "STEAM_TOKEN" in os.environ:
         # if steam token findable launch the cog
-        bot.add_cog(SteamCog(bot))
+        bot.add_cog(Steam(bot))
 
     else:
         print("No steam api key available")
+        
