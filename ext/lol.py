@@ -134,7 +134,7 @@ class LeagueCog(Cog):
             champNames[champions.get(champ).get("key")] = champions.get(champ).get("id")
         self.champNames = champNames
 
-    @commands.command(name='lolprofile', aliases=["lp"])
+    @commands.command(aliases=["lp"])
     async def lolprofile(self, ctx, region, summonerName):
         """
         Displays a summoner's profile.
@@ -169,7 +169,7 @@ class LeagueCog(Cog):
 
         await ctx.send(embed=embed)
 
-    @commands.command(name='lolmatches', aliases=["lm"])
+    @commands.command(aliases=["lm"])
     async def lolmatches(self, ctx, region, summonerName, numberOfMatches="1"):
         """
         Generates summoners match history (maximum 5 matches).
