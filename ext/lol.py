@@ -175,14 +175,14 @@ class LeagueOfLegends(Cog):
             return
 
         # Request the summoner data
-        data = await self.get_summoner_data(region, summoner)
+        data = await self.get_summoner_data(REGIONS[region.lower()], summoner)
         # If there is no data available, notify the user and return
         if not data:
             await ctx.send("Summoner not found. Please double check that the you are using the summoner name and not the username.")
             return
 
         # Get the ranked data
-        rank = await self.get_ranked_data(REGIONS[region], data["id"])
+        rank = await self.get_ranked_data(REGIONS[region.lower()], data["id"])
 
         # Create an embed to display summoner data
         embed = discord.Embed(title="Profile of " + data["name"], color=COLOR)
