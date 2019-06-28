@@ -163,7 +163,7 @@ class LeagueOfLegends(Cog):
         """
 
     @lol.command(aliases=["lp"])
-    async def profile(self, ctx, region, summoner):
+    async def profile(self, ctx, region, *, summoner):
         """
         Displays a summoner's profile.
         """
@@ -174,9 +174,11 @@ class LeagueOfLegends(Cog):
 
         # Request the summoner data
         data = await self.get_summoner_data(region, summoner)
+        # If there is no data available, notify the user and return
         if not data:
-            await ctx.send('Summoner not found. If using a multi-word summoner name remember to use quotation marks ""')
+            await ctx.send("Summoner not found. Please double check that the you are using the summoner name and not the username.")
             return
+
         # Create an embed to display summoner data
         embed = discord.Embed(title=data.get("name"))
         embed.set_author(name=("Summoner Level - " + str(data.get("summonerLevel"))))
