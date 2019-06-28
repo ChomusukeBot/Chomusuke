@@ -58,16 +58,12 @@ class SteamCog(Cog):
         data = await self.getProfileData(self, steamprofile)
 
         #create var for checking
-        loccode = str(data.get("response").get("players")[0].get("locstatecode"))
+        
         if not data:
             await ctx.send("profile not found")
             return
         # do all the embed stuff
-        if data.get(loccode == None):
-            embed = discord.Embed(title=("Real name: " + (data.get("response").get("players")[0].get("realname"))))      
-            embed.set_author(name=("Name:" + str(data.get("response").get("players")[0].get("personaname"))))
-             
-        else:
+
             embed = discord.Embed(title=("Real name: " + (data.get("response").get("players")[0].get("realname"))))      
             embed.set_author(name=("Name:" + str(data.get("response").get("players")[0].get("personaname"))))
             embed.add_field(name='country code:', value=data.get("response").get("players")[0].get("loccountrycode"), inline=True)
