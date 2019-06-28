@@ -1,1 +1,1 @@
-worker: python launch.py
+worker: python launch.py --no-web
