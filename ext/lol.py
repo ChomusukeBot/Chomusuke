@@ -210,15 +210,15 @@ class LeagueOfLegends(Cog):
             await ctx.send("That region was not found. Please use one of the following:\n" + ", ".join(REGIONS.keys()))
             return
 
-        # Patch the current region
-        region = REGIONS[region.lower()]
-
         # Request the summoner data
         data = await self.get_summoner_data(region, summoner)
         # If there is no data available, notify the user and return
         if not data:
             await ctx.send("Summoner not found. Please double check that the you are using the summoner name and not the username.")
             return
+
+        # Patch the current region
+        region = REGIONS[region.lower()]
 
         # Get the match history
         async with self.bot.session.get(BASE_URL.format(region) + MATCHES_API.format(data["accountId"], self.league_key)) as resp:
