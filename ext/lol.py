@@ -163,7 +163,7 @@ class LeagueOfLegends(Cog):
         """
 
     @lol.command(aliases=["lp"])
-    async def profile(self, ctx, region, summonerName):
+    async def profile(self, ctx, region, summoner):
         """
         Displays a summoner's profile.
         """
@@ -172,7 +172,6 @@ class LeagueOfLegends(Cog):
             await ctx.send("That region was not found. Please use one of the following:\n" + ", ".join(REGIONS.keys()))
             return
 
-        summoner = summonerName
         # Request summoner data
         data = await self.get_summoner_data(self, region, summoner)
         if not data:
