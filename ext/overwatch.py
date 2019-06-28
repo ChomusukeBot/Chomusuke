@@ -55,8 +55,7 @@ class OWApi:
         # then the profile was not found, or is private.
         if "message" in resp:
             return False
-        else:
-            return True
+        return True
 
     async def get_player_stats(self, platform, region, player):
         """
@@ -72,8 +71,7 @@ class OWApi:
             resp, resp_code = await self.__get_json(session, url)
         if resp_code != 200:
             return None
-        else:
-            return resp
+        return resp
 
 
 class Overwatch(Cog):
@@ -174,8 +172,7 @@ class Overwatch(Cog):
         if platform == "pc":
             if "#" not in player:
                 return await ctx.send("PC player names must include a discriminator. Example: `Lemon#13526`")
-            else:
-                player = player.replace("#", "-")
+            player = player.replace("#", "-")
         # Check that the user has provided a valid overwatch platform.
         platforms = ("pc", "psn", "xbl")
         if platform not in platforms:
@@ -189,7 +186,7 @@ class Overwatch(Cog):
         found = await self.api.get_player_profile(platform, region, player)
         if found is None:
             return await ctx.send("Something went wrong when attempting to contact the Overwatch API.")
-        elif found is False:
+        if found is False:
             return await ctx.send("The profile for the player specified either does not exist or is set private.")
         # Actually get and parse stats!
         embed = await self.__build_stats_embed(platform, region, player)
@@ -202,8 +199,7 @@ class Overwatch(Cog):
         status = await self.api.status()
         if status != 200:
             return await ctx.send("Overwatch API functioning normally! 👍")
-        else:
-            return await ctx.send(f"Something is wrong with the overwatch API! Got status `{status}`")
+        return await ctx.send(f"Something is wrong with the overwatch API! Got status `{status}`")
 
 
 def setup(bot):
