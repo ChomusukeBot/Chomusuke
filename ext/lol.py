@@ -129,7 +129,7 @@ class LeagueOfLegends(Cog):
         self.bot = bot
         # Save the league api key and the current league version
         self.league_key = os.environ["LEAGUE_TOKEN"]
-        self.league_ver = json.loads(requests.get(LEAGUE_VERSION).text)[0]
+        self.league_ver = requests.get(LEAGUE_VERSION).json()[0]
         # Save the champion names and champion keys for faster access
         champions = json.loads(requests.get(CHAMPIONS_URL.format(self.league_ver)).text).get("data")
         champNames = {}
