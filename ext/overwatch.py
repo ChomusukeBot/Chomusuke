@@ -162,7 +162,7 @@ class Overwatch(Cog):
         return embed
 
     @commands.command(aliases=["ow_stats", "ow"])
-    async def get_overwatch_stats(self, ctx, player=None, platform="pc", region="global"):
+    async def overwatch(self, ctx, player=None, platform="pc", region="global"):
         """
             Command to get the stats for a given player on a given platform.
         """
@@ -193,13 +193,6 @@ class Overwatch(Cog):
         if embed is None:
             return await ctx.send("Something went wrong when attempting to contact the Overwatch API.")
         return await ctx.send(embed=embed)
-
-    @commands.command(aliases=["ow_status", "ows"])
-    async def overwatch_status(self, ctx):
-        status = await self.api.status()
-        if status != 200:
-            return await ctx.send("Overwatch API functioning normally! 👍")
-        return await ctx.send(f"Something is wrong with the overwatch API! Got status `{status}`")
 
 
 def setup(bot):
