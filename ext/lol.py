@@ -225,32 +225,15 @@ class LeagueOfLegends(Cog):
             mode = MATCHMAKING_QUEUES[match_data["queueId"]]
             duration = match_data["gameDuration"]
             timestamp = match_data["gameCreation"]
-
-            # Grab Participant Data
-            matchPlayers = []
-            for player in (match_data.get("participants")):
-                playerDict = {
-                    "champion": str(player.get("championId")),
-                    "participantId": player.get("participantId"),
-                    "assists": str(player.get("stats").get("assists")),
-                    "deaths": str(player.get("stats").get("deaths")),
-                    "kills": str(player.get("stats").get("kills")),
-                    "team": str(player.get("teamId")),
-                    "lane": str(player.get("timeline").get("lane")),
-                    "role": str(player.get("timeline").get("role")),
-                    "win": player.get("stats").get("win")
-                }
-                matchPlayers.append(playerDict)
-            # Grab summoner names from participantIds
-            for player in matchPlayers:
-                for participant in match_data.get("participantIdentities"):
-                    if(player.get("participantId") == participant.get("participantId")):
-                        player["summonerName"] = participant.get("player").get("summonerName")
-            # Current time
             time = self.seconds_to_text(duration)
-            # Split players into teams
-            blueTeam = matchPlayers[:5]
-            redTeam = matchPlayers[5:]
+
+            # Split the two teams to process their data
+            blue = (match_data["participants"][:5], match_data["participantIdentities"][:5])
+            red = (match_data["participants"][5:], match_data["participantIdentities"][5:])
+            # Generate the strings
+            blue_data = await self.format_match_data(*blue)
+            red_data = await self.format_match_data(*red)
+
             # TimeStamp calculation
             currentTime = datetime.datetime.now()
             elapsedDays = currentTime - datetime.datetime.fromtimestamp(timestamp/1000.0)
@@ -263,66 +246,25 @@ class LeagueOfLegends(Cog):
 
             # Create the embed to add the data
             embed = discord.Embed(title=mode + " ({})".format(timeStamp), description="Game duration: " + time, color=COLOR)
-
-            # Sort players by their lanes if possible, else just put them in randomly
-            blueTeamSorted = ""
-            blueTeamString = ""
-            redTeamSorted = ""
-            redTeamString = ""
-            first = ""
-            second = ""
-            third = ""
-            fourth = ""
-            fifth = ""
-            # Blue team sorted or unsorted
-            for player in blueTeam:
-                if(player.get("lane") == "TOP"):
-                    first = self.get_player_string(player, "TOP", "SOLO")
-                if(player.get("lane") == "JUNGLE"):
-                    second = self.get_player_string(player, "JUNGLE", "NONE")
-                if(player.get("lane") == "MIDDLE"):
-                    third = self.get_player_string(player, "MIDDLE", "SOLO")
-                if(player.get("lane") == "BOTTOM" and player.get("role") == "DUO_CARRY"):
-                    fourth = self.get_player_string(player, "BOTTOM", "DUO_CARRY")
-                if(player.get("lane") == "BOTTOM" and player.get("role") == "DUO_SUPPORT"):
-                    fifth = self.get_player_string(player, "BOTTOM", "DUO_SUPPORT")
-                blueTeamString += "{} - {} ({}/{}/{})\n".format(player.get("summonerName"), self.champions.get(player.get("champion")),
-                                                                player.get("kills"), player.get("deaths"), player.get("assists"))
-            blueTeamSorted = blueTeamString
-            try:
-                if first and second and third and fourth and fifth:
-                    blueTeamSorted = "{}{}{}{}{}".format(first, second, third, fourth, fifth)
-            except UnboundLocalError:
-                print("Old game data format.")
-            embed.add_field(name="<:large_blue_circle:593787888861315078> BLUE TEAM <:large_blue_circle:593787888861315078>",
-                            value=blueTeamSorted, inline=False)
-            # Red team sorted or unsorted
-            for player in redTeam:
-                if(player.get("lane") == "TOP"):
-                    first = self.get_player_string(player, "TOP", "SOLO")
-                if(player.get("lane") == "JUNGLE"):
-                    second = self.get_player_string(player, "JUNGLE", "NONE")
-                if(player.get("lane") == "MIDDLE"):
-                    third = self.get_player_string(player, "MIDDLE", "SOLO")
-                if(player.get("lane") == "BOTTOM" and player.get("role") == "DUO_CARRY"):
-                    fourth = self.get_player_string(player, "BOTTOM", "DUO_CARRY")
-                if(player.get("lane") == "BOTTOM" and player.get("role") == "DUO_SUPPORT"):
-                    fifth = self.get_player_string(player, "BOTTOM", "DUO_SUPPORT")
-                redTeamString += "{} - {} ({}/{}/{})\n".format(player.get("summonerName"), self.champions.get(player.get("champion")),
-                                                               player.get("kills"), player.get("deaths"), player.get("assists"))
-            redTeamSorted = redTeamString
-            try:
-                if first and second and third and fourth and fifth:
-                    redTeamSorted = "{}{}{}{}{}".format(first, second, third, fourth, fifth)
-            except UnboundLocalError:
-                print("Old game data format.")
-            embed.add_field(name="<:red_circle:593788287974375455> RED TEAM <:red_circle:593788287974375455>", value=redTeamSorted, inline=False)
-            # Find the winner of the game
-            if(blueTeam[0].get("win")):
-                embed.set_footer(text="Blue team won! The values in parenthesis represent (Kill/Death/Assist)")
-            else:
-                embed.set_footer(text="Red team won! The values in parenthesis represent (Kill/Death/Assist)")
+            # Add the fields with the information
+            embed.add_field(name="🔵 BLUE TEAM 🔵", value=blue_data, inline=False)
+            embed.add_field(name="🔴 RED TEAM 🔴", value=red_data, inline=False)
+            # Add the information about the team that won
+            embed.set_footer(text=("Blue" if match_data["teams"][0]["win"] == "Win" else "Red") + " team won!")
+            # Finally, return the embed
             await ctx.send(embed=embed)
+
+    async def format_match_data(self, players, identities):
+        # Create a place to store our data
+        base = ""
+        # For every player and identity
+        for player, identity in zip(players, identities):
+            # Add the formatted information
+            base += "{0} - {1} ({2}/{3}/{4})\n".format(identity["player"]["summonerName"],
+                                                       self.champions.get(str(player["championId"]), "Unknown"),
+                                                       player["stats"]["kills"], player["stats"]["deaths"], player["stats"]["assists"])
+        # Finally, return the generated string
+        return base
 
     async def get_summoner_data(self, region, summoner):
         # Run the response as usual
@@ -342,16 +284,6 @@ class LeagueOfLegends(Cog):
     async def get_match_information(self, region, matchId):
         async with self.bot.session.get(BASE_URL.format(region) + MATCH_API.format(matchId, self.league_key)) as resp:
             return await resp.json()
-
-    def get_player_string(self, player, lane, role):
-        if(player.get("lane") == lane):
-            if(player.get("role") == role):
-                return "{} - {} ({}/{}/{})\n".format(player.get("summonerName"), self.champions.get(player.get("champion")),
-                                                     player.get("kills"), player.get("deaths"), player.get("assists"))
-            else:
-                return ""
-        else:
-            return ""
 
     def seconds_to_text(self, secs):
         days = secs//86400
