@@ -164,7 +164,7 @@ class LeagueOfLegends(Cog):
         Commands to interact with League of Legends profiles and matches.
         """
 
-    @lol.command(aliases=["lp"])
+    @lol.command(aliases=["p"])
     async def profile(self, ctx, region, *, summoner):
         """
         Displays a summoner's profile.
