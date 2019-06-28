@@ -195,4 +195,4 @@ def setup(bot):
     """
     Our function called to add the cog to our bot.
     """
-    bot.add_cog(GitHub(bot, "github", "token", HEADERS, ENDPOINTS))
+    bot.add_cog(GitHub(bot, "github", "token", HEADERS, ENDPOINTS, False))

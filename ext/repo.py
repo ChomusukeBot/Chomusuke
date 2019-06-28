@@ -17,7 +17,7 @@ class Repo(Cog):
     """
     Cog for accessing git repos via their respective APIs.
     """
-    def __init__(self, bot, name: str, auth: str, headers: dict, endpoints: dict):
+    def __init__(self, bot, name: str, auth: str = "", headers: dict = {}, endpoints: dict = {}, user_token: bool = True):
         # Save our bot for later use
         self.bot = bot
         # Save the collections
@@ -27,6 +27,7 @@ class Repo(Cog):
         self.auth = auth
         self.headers = headers
         self.endpoints = endpoints
+        self.user_token = user_token
 
     async def dump_data(self, ctx):
         """
@@ -59,12 +60,16 @@ class Repo(Cog):
         """
         Generates a set of headers for the use on aiohttp requests.
         """
-        # Get the current user token
-        token = (await self.get_token(ctx.author.id))["token"]
         # Create a copy of the default haders
         headers = copy.deepcopy(self.headers)
-        # Set the token specified by the user
-        headers["Authorization"] = f"{self.auth} {token}"
+
+        # If the cog requires authentication headers
+        if self.user_token:
+            # Get the current user token
+            token = (await self.get_token(ctx.author.id))["token"]
+            # Set the token specified by the user
+            headers["Authorization"] = f"{self.auth} {token}"
+
         # Finally, return the headers
         return headers
 
