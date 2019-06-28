@@ -167,12 +167,11 @@ class LeagueOfLegends(Cog):
         """
         Displays a summoner's profile.
         """
-        # Check if the specified region is correct
-        if(region.lower() in REGIONS):
-            region = REGIONS.get(region.lower())
-        else:
-            await ctx.send("Region not found. Use one of the following: \nBR, EUNE, EUW, JP, KR, LAN, LAS, NA, OCE, TR, RU, PBE")
+        # If the specific region is not on our dictionary, notify and return
+        if not region.lower() in REGIONS:
+            await ctx.send("That region was not found. Please use one of the following:\n" + ", ".join(REGIONS.keys()))
             return
+
         summoner = summonerName
         # Request summoner data
         data = await self.getSummonerData(self, region, summoner)
