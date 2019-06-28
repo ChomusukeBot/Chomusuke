@@ -11,6 +11,7 @@ TFII_API = "/ISteamUserStats/GetUserStatsForGame/v0002/?appid=440&key={}&steamid
 RUST_API = "/ISteamUserStats/GetUserStatsForGame/v0002/?appid=252490&key={}&steamid={}"
 
 # cog stuff
+
 class Steam(Cog):
 
     def __init__(self, bot):
@@ -18,30 +19,30 @@ class Steam(Cog):
         self.bot = bot
         self.steam_key = os.environ["STEAM_TOKEN"]
 
-    #DATAHELP
-    #profile
+    # DATAHELP
+    # profile
     async def getProfileData(self, ctx, profile):
         async with self.bot.session.get(BASE_URL + PROFILE_API.format(self.steam_key, profile)) as resp:
             return await resp.json()
 
-    #CSGOProfile
+    # CSGOProfile
     async def getCSData(self, ctx, profile):
         async with self.bot.session.get(BASE_URL + CSGO_API.format(self.steam_key, profile)) as resp:
             return await resp.json()
 
-    #TF2Data
+    # TF2Data
     async def getTFIIData(self, ctx, profile):
         async with self.bot.session.get(BASE_URL + TFII_API.format(self.steam_key, profile)) as resp:
             return await resp.json()
 
-    #RustData
+    # RustData
     async def getRustData(self, ctx, profile):
         async with self.bot.session.get(BASE_URL + RUST_API.format(self.steam_key, profile)) as resp:
             return await resp.json()
 
-    #COMMANDS
+    # COMMANDS
     # PROFILE COMMAND
-    @commands.command(name='profile', aliases=["myp"])
+    @commands.command(name="profile", aliases=["myp"])
     async def profile(self, ctx, char):
         """
         Generates an embed displaying the specified user's STEAM profile, needs steam id.
@@ -50,26 +51,26 @@ class Steam(Cog):
         steamprofile = char
         data = await self.getProfileData(self, steamprofile)
 
-        #create var for checking
-        
+        # create var for checking
+
         if not data:
             await ctx.send("profile not found")
             return
         # do all the embed stuff
 
-        embed = discord.Embed(title=("Real name: " + (data.get("response").get("players")[0].get("realname"))))         
+        embed = discord.Embed(title=("Real name: " + (data.get("response").get("players")[0].get("realname"))))
         embed.set_author(name=("Name:" + str(data.get("response").get("players")[0].get("personaname"))))
-        embed.add_field(name='country code:', value=data.get("response").get("players")[0].get("loccountrycode"), inline=True)
+        embed.add_field(name="country code:", value=data.get("response").get("players")[0].get("loccountrycode"), inline=True)
         
         embed.set_thumbnail(url=(data.get("response").get("players")[0].get("avatarmedium")))
         await ctx.send(embed=embed)
 
-    #PROFILE SEARCH Command
+    # PROFILE SEARCH Command
     @commands.command(name="inprofile", aliases=["fip"])
     async def inprofile(self, ctx, char, search):
         """
         Generates an embed displaying the specified user's STEAM profile with a custom search parameter
-        ex "inprofile [steam id] 
+        ex "inprofile [steam id]
         """
         # get data and needed variables
         steamprofile = char
@@ -81,15 +82,14 @@ class Steam(Cog):
             return
 
         # create and send embeded
-        embed = discord.Embed(title=("Real name: " + (data.get("response").get("players")[0].get("realname"))))      
+        embed = discord.Embed(title=("Real name: " + (data.get("response").get("players")[0].get("realname"))))
         embed.set_author(name=("Name:" + str(data.get("response").get("players")[0].get("personaname"))))
-        embed.add_field(name=findData + "(custom):", value=data.get("response").get("players")[0].get(findData), inline=True) 
+        embed.add_field(name=findData + "(custom):", value=data.get("response").get("players")[0].get(findData), inline=True)
         embed.set_thumbnail(url=(data.get("response").get("players")[0].get("avatarmedium")))
-        
+
         await ctx.send(embed=embed)
 
-
-    #CSGO Command
+    # CSGO Command
     @commands.command(name="csgo", aliases=["csg"])
     async def csgo(self, ctx, char):
         """
@@ -100,8 +100,8 @@ class Steam(Cog):
         steamprofile = char
         data = await self.getProfileData(self, steamprofile)
         data2 = await self.getCSData(self, steamprofile)
-        #await ctx.send(data)
-        #await ctx.send(steamprofile)
+        # await ctx.send(data)
+        # await ctx.send(steamprofile)
         if not data2:
             await ctx.send("stats not found")
             return
@@ -115,14 +115,14 @@ class Steam(Cog):
         embed.add_field(name="Total damage done: ", value=str([x for x in data2["playerstats"]["stats"] if x["name"] == "total_damage_done"][0]["value"]), inline=True)
         embed.add_field(name="Last match kills: ", value=str([x for x in data2["playerstats"]["stats"] if x["name"] == "last_match_kills"][0]["value"]), inline=True)
         embed.add_field(name="Last match deaths: ", value=str([x for x in data2["playerstats"]["stats"] if x["name"] == "last_match_deaths"][0]["value"]), inline=True)
-        
+
         await ctx.send(embed=embed)
 
     # TEAM FORTERESS TWO command
-    @commands.command(name='tfii', aliases=["tf2"])
+    @commands.command(name="tfii", aliases=["tf2"])
     async def tfii(self, ctx, char):
         """
-        embed displaying the specified user's stats for 
+        embed displaying the specified user's stats for
         Team forteress II
         ex: tfii [steam ID code]
         """
@@ -130,7 +130,7 @@ class Steam(Cog):
         steamprofile = char
         data = await self.getProfileData(self, steamprofile)
         data3 = await self.getTFIIData(self, steamprofile)
-        
+
         if not data3:
             await ctx.send("stats not found")
             return
@@ -146,9 +146,8 @@ class Steam(Cog):
         embed.add_field(name="Engineer sentry kills: ", value=str([x for x in data3["playerstats"]["stats"] if x["name"] == "Engineer.max.iSentryKills"][0]["value"]), inline=True)
         await ctx.send(embed=embed)
 
-
     # make the command
-    @commands.command(name='rust', aliases=["rst"])
+    @commands.command(name="rust", aliases=["rst"])
     async def rust(self, ctx, char):
         """
         embed displaying the specified user's stats for 
@@ -183,4 +182,3 @@ def setup(bot):
 
     else:
         print("No steam api key available")
-        
