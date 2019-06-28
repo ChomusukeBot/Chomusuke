@@ -196,45 +196,39 @@ class LeagueOfLegends(Cog):
         # Finally, send the embed
         await ctx.send(embed=embed)
 
-    @commands.command(aliases=["lm"])
-    async def lolmatches(self, ctx, region, summonerName, numberOfMatches="1"):
+    @lol.command(aliases=["m"])
+    async def match(self, ctx, region, *, summoner):
         """
-        Generates summoners match history (maximum 5 matches).
+        Shows the match history of the specified summoner up to a maximum of 5.
         """
-        # Check if the specified region is correct
-        if(region.lower() in REGIONS):
-            region = REGIONS.get(region.lower())
-        else:
-            await ctx.send("Region not found. Use one of the following: \nBR, EUNE, EUW, JP, KR, LAN, LAS, NA, OCE, TR, RU, PBE")
+        # If the specific region is not on our dictionary, notify and return
+        if not region.lower() in REGIONS:
+            await ctx.send("That region was not found. Please use one of the following:\n" + ", ".join(REGIONS.keys()))
             return
+
         # Request the summoner data
-        summoner = summonerName
-        data = await self.get_summoner_data(self, region, summoner)
+        data = await self.get_summoner_data(REGIONS[region.lower()], summoner)
+        # If there is no data available, notify the user and return
         if not data:
-            await ctx.send('Summoner not found. If using a multi-word summoner name remember to use quotation marks ""')
+            await ctx.send("Summoner not found. Please double check that the you are using the summoner name and not the username.")
             return
-        # Check how many matches the user requested
-        if(int(numberOfMatches) > 5):
-            await ctx.send("I am only allowed to send you a maximum of 5 matches.")
-            return
-        elif(int(numberOfMatches) < 1):
-            numberOfMatches = str(1)
-        accountId = data.get("accountId")
-        # Request the match history of the summoner
-        params = "endIndex="+numberOfMatches
-        matchHistory = await self.get_match_history(self, region, accountId, params)
-        # Create an embed for each match
-        for match in matchHistory.get("matches"):
-            matchId = match.get("gameId")
-            # Request match information
-            matchData = await self.getMatchInformation(self, region, matchId)
-            # Grab important match data
-            gameMode = MATCHMAKING_QUEUES.get(matchData.get("queueId"))
-            gameDuration = matchData.get("gameDuration")
-            matchTimeStamp = matchData.get("gameCreation")
+
+        # Get the match history
+        history = await self.get_match_history(REGIONS[region.lower()], data["accountId"], "endIndex=1")
+
+        # Iterate over the matches on the response
+        for match_meta in history["matches"]:
+            # Request the match information
+            match_data = await self.get_match_information(REGIONS[region.lower()], match_meta["gameId"])
+
+            # Grab the important match data
+            mode = MATCHMAKING_QUEUES[match_data["queueId"]]
+            duration = match_data["gameDuration"]
+            timestamp = match_data["gameCreation"]
+
             # Grab Participant Data
             matchPlayers = []
-            for player in (matchData.get("participants")):
+            for player in (match_data.get("participants")):
                 playerDict = {
                     "champion": str(player.get("championId")),
                     "participantId": player.get("participantId"),
@@ -248,19 +242,18 @@ class LeagueOfLegends(Cog):
                 }
                 matchPlayers.append(playerDict)
             # Grab summoner names from participantIds
-            gameinfo = gameMode
             for player in matchPlayers:
-                for participant in matchData.get("participantIdentities"):
+                for participant in match_data.get("participantIdentities"):
                     if(player.get("participantId") == participant.get("participantId")):
                         player["summonerName"] = participant.get("player").get("summonerName")
             # Current time
-            time = self.seconds_to_text(gameDuration)
+            time = self.seconds_to_text(duration)
             # Split players into teams
             blueTeam = matchPlayers[:5]
             redTeam = matchPlayers[5:]
             # TimeStamp calculation
             currentTime = datetime.datetime.now()
-            elapsedDays = currentTime - datetime.datetime.fromtimestamp(matchTimeStamp/1000.0)
+            elapsedDays = currentTime - datetime.datetime.fromtimestamp(timestamp/1000.0)
             if(elapsedDays.days == 0):
                 timeStamp = "today"
             elif(elapsedDays.days == 1):
@@ -268,7 +261,7 @@ class LeagueOfLegends(Cog):
             else:
                 timeStamp = str(elapsedDays.days) + " days ago"
             # Embed creation
-            embed = discord.Embed(title=(gameinfo + " ({})".format(timeStamp)), description=("Game duration: " + time), colour=0xEDB24C)
+            embed = discord.Embed(title=(mode + " ({})".format(timeStamp)), description=("Game duration: " + time), colour=0xEDB24C)
             # Sort players by their lanes if possible, else just put them in randomly
             blueTeamSorted = ""
             blueTeamString = ""
@@ -282,15 +275,15 @@ class LeagueOfLegends(Cog):
             # Blue team sorted or unsorted
             for player in blueTeam:
                 if(player.get("lane") == "TOP"):
-                    first = self.get_player_string(self, player, "TOP", "SOLO")
+                    first = self.get_player_string(player, "TOP", "SOLO")
                 if(player.get("lane") == "JUNGLE"):
-                    second = self.get_player_string(self, player, "JUNGLE", "NONE")
+                    second = self.get_player_string(player, "JUNGLE", "NONE")
                 if(player.get("lane") == "MIDDLE"):
-                    third = self.get_player_string(self, player, "MIDDLE", "SOLO")
+                    third = self.get_player_string(player, "MIDDLE", "SOLO")
                 if(player.get("lane") == "BOTTOM" and player.get("role") == "DUO_CARRY"):
-                    fourth = self.get_player_string(self, player, "BOTTOM", "DUO_CARRY")
+                    fourth = self.get_player_string(player, "BOTTOM", "DUO_CARRY")
                 if(player.get("lane") == "BOTTOM" and player.get("role") == "DUO_SUPPORT"):
-                    fifth = self.get_player_string(self, player, "BOTTOM", "DUO_SUPPORT")
+                    fifth = self.get_player_string(player, "BOTTOM", "DUO_SUPPORT")
                 blueTeamString += "{} - {} ({}/{}/{})\n".format(player.get("summonerName"), self.champions.get(player.get("champion")),
                                                                 player.get("kills"), player.get("deaths"), player.get("assists"))
             blueTeamSorted = blueTeamString
@@ -304,15 +297,15 @@ class LeagueOfLegends(Cog):
             # Red team sorted or unsorted
             for player in redTeam:
                 if(player.get("lane") == "TOP"):
-                    first = self.get_player_string(self, player, "TOP", "SOLO")
+                    first = self.get_player_string(player, "TOP", "SOLO")
                 if(player.get("lane") == "JUNGLE"):
-                    second = self.get_player_string(self, player, "JUNGLE", "NONE")
+                    second = self.get_player_string(player, "JUNGLE", "NONE")
                 if(player.get("lane") == "MIDDLE"):
-                    third = self.get_player_string(self, player, "MIDDLE", "SOLO")
+                    third = self.get_player_string(player, "MIDDLE", "SOLO")
                 if(player.get("lane") == "BOTTOM" and player.get("role") == "DUO_CARRY"):
-                    fourth = self.get_player_string(self, player, "BOTTOM", "DUO_CARRY")
+                    fourth = self.get_player_string(player, "BOTTOM", "DUO_CARRY")
                 if(player.get("lane") == "BOTTOM" and player.get("role") == "DUO_SUPPORT"):
-                    fifth = self.get_player_string(self, player, "BOTTOM", "DUO_SUPPORT")
+                    fifth = self.get_player_string(player, "BOTTOM", "DUO_SUPPORT")
                 redTeamString += "{} - {} ({}/{}/{})\n".format(player.get("summonerName"), self.champions.get(player.get("champion")),
                                                                player.get("kills"), player.get("deaths"), player.get("assists"))
             redTeamSorted = redTeamString
