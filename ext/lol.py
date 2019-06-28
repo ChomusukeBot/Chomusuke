@@ -191,7 +191,7 @@ class LeagueOfLegends(Cog):
         # Add our fields (if the summoner is unranked, show the unranked status)
         embed.add_field(name="Summoner Level", value="Level " + str(data["summonerLevel"]))
         embed.add_field(name="Rank", value=rank[0]["tier"] + " " + rank[0]["rank"] if rank else "Unranked")
-        embed.add_field(name="Ranked W/L", value=rank[0]["wins"] + "/" + rank[0]["losses"] if rank else "Unranked")
+        embed.add_field(name="Wins/Loses", value=str(rank[0]["wins"]) + "/" + str(rank[0]["losses"]) if rank else "Unranked")
         embed.add_field(name="League Points", value=rank[0]["leaguePoints"] if rank else "Unranked")
         # Finally, send the embed
         await ctx.send(embed=embed)
