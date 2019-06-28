@@ -1,8 +1,9 @@
+import discord
 from discord.ext import commands
 from cog import Cog
-import json
 import aiohttp
 import async_timeout
+
 
 class OWApi:
     def __init__(self):
@@ -24,9 +25,9 @@ class OWApi:
     async def status(self):
         """
             Requests the status of the OWApi.
-            :return: int -- The status code of the request. 
+            :return: int -- The status code of the request.
         """
-        url = self.base_url+ '/'
+        url = self.base_url + '/'
         async with aiohttp.ClientSession() as session:
             resp, resp_code = await self.__get_json(session, url)
         return resp_code
@@ -46,11 +47,11 @@ class OWApi:
         async with aiohttp.ClientSession() as session:
             resp, resp_code = await self.__get_json(session, url)
         # In case something goes wrong when querying the OWApi.
-        if resp_code is not 200:
+        if resp_code != 200:
             return None
         if comp:
             return resp
-        # If there is an error message in the response, 
+        # If there is an error message in the response,
         # then the profile was not found, or is private.
         if 'message' in resp:
             return False
@@ -69,10 +70,11 @@ class OWApi:
         url = self.base_url + f'/stats/{platform}/{region}/{player}'
         async with aiohttp.ClientSession() as session:
             resp, resp_code = await self.__get_json(session, url)
-        if resp_code is not 200:
+        if resp_code != 200:
             return None
         else:
             return resp
+
 
 class Overwatch(Cog):
     """
@@ -123,12 +125,12 @@ class Overwatch(Cog):
 
     async def __build_stats_embed(self, platform, region, player):
         """
-            Function calls the get_player_stats function from the OWApi, and uses the returned response to build 
+            Function calls the get_player_stats function from the OWApi, and uses the returned response to build
             the embed that will be sent.
         """
         stats = await self.api.get_player_stats(platform, region, player)
         profile = await self.api.get_player_profile(platform, region, player, True)
-        comp = False # Used to determine if we need to pull competitive stats or not.
+        comp = False  # Used to determine if we need to pull competitive stats or not.
         if '-' in player:
             player = player.replace('-', '#')
         # Start building the embed.
@@ -173,14 +175,14 @@ class Overwatch(Cog):
             if '#' not in player:
                 return await ctx.send('PC player names must include a discriminator. Example: `Lemon#13526`')
             else:
-                player = player.replace('#', '-') 
+                player = player.replace('#', '-')
         # Check that the user has provided a valid overwatch platform.
         platforms = ('pc', 'psn', 'xbl')
         if platform not in platforms:
             return await ctx.send(f"`{platform}` is not a valid platform. "
                                   f"\nValid platform choices are: `pc`, `psn`, or `xbl`.")
         # Check that the region is valid
-        regions = ('us','eu','kr','cn','global')
+        regions = ('us', 'eu', 'kr', 'cn', 'global')
         if region not in regions:
             return ctx.send(f"`{region} is not a valid region. \nValid choices for region are `{'`, `'.join(regions)}")
         # Check if the player provided was found.
@@ -198,7 +200,7 @@ class Overwatch(Cog):
     @commands.command(aliases=['ow_status', 'ows'])
     async def overwatch_status(self, ctx):
         status = await self.api.status()
-        if status is 200:
+        if status != 200:
             return await ctx.send("Overwatch API functioning normally! 👍")
         else:
             return await ctx.send(f"Something is wrong with the overwatch API! Got status `{status}`")
