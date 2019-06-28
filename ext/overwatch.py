@@ -143,10 +143,10 @@ class Overwatch(Cog):
         embed.add_field(name="Quick Play Time", value=stats["stats"]["game"]["quickplay"][-1]["value"])
         if comp:
             embed.add_field(name="Competitive Play Time", value=stats["stats"]["game"]["competitive"][-1]["value"])
-        top_heroes = "\n• ".join([f"*{x["hero"]}*:  {x["played"]}" for x in stats["stats"]["top_heroes"]["quickplay"]["played"][:3]])
+        top_heroes = "\n• ".join([f"*{x['hero']}*:  {x['played']}" for x in stats["stats"]["top_heroes"]["quickplay"]["played"][:3]])
         embed.add_field(name="Quick Play Heroes", value=f"• {top_heroes}")
         if comp:
-            top_heroes = "\n• ".join([f"*{x["hero"]}*:  {x["played"]}" for x in stats["stats"]["top_heroes"]["competitive"]["played"][:3]])
+            top_heroes = "\n• ".join([f"*{x['hero']}*:  {x['played']}" for x in stats["stats"]["top_heroes"]["competitive"]["played"][:3]])
             embed.add_field(name="Competitive Heroes", value=f"• {top_heroes}")
         avgs = await self.__handle_avgs(stats["stats"]["average"]["quickplay"])
         avgs = "\n• ".join([f"**{key}**: {value}" for key, value in avgs.items()])
