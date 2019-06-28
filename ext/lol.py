@@ -6,6 +6,8 @@ import os
 from cog import Cog
 from discord.ext import commands, tasks
 
+# The color of the embeds
+COLOR = 0xEDB24C
 # Base URL for all API calls
 BASE_URL = "https://{}.api.riotgames.com"
 # League of Legends Static Data for profile pictures
@@ -179,22 +181,19 @@ class LeagueOfLegends(Cog):
             await ctx.send("Summoner not found. Please double check that the you are using the summoner name and not the username.")
             return
 
-        # Create an embed to display summoner data
-        embed = discord.Embed(title=data.get("name"))
-        embed.set_author(name=("Summoner Level - " + str(data.get("summonerLevel"))))
-        embed.set_thumbnail(url=PROFILE_IMAGE_URL.format(self.version, data.get("profileIconId")))
-        # Request the summoner ranked data
-        summonerId = data.get("id")
-        rankData = await self.get_ranked_data(self, region, summonerId)
-        # Check if ranked data exists, otherwise Unranked
-        if rankData:
-            rankData = rankData[0]
-            embed.add_field(name="Rank", value=("{} {}".format(rankData.get("tier"), rankData.get("rank"))), inline=True)
-            embed.add_field(name="Ranked W/L", value=("{}/{}".format(rankData.get("wins"), rankData.get("losses"))), inline=True)
-            embed.add_field(name="League Points", value=rankData.get("leaguePoints"), inline=True)
-        else:
-            embed.add_field(name="Unranked", value="\u200b", inline=True)
+        # Get the ranked data
+        rank = await self.get_ranked_data(REGIONS[region], data["id"])
 
+        # Create an embed to display summoner data
+        embed = discord.Embed(title="Profile of " + data["name"], color=COLOR)
+        # Set the picture as the user profile image
+        embed.set_thumbnail(url=PROFILE_IMAGE_URL.format(self.version, data.get("profileIconId")))
+        # Add our fields (if the summoner is unranked, show the unranked status)
+        embed.add_field(name="Summoner Level", value="Level " + str(data["summonerLevel"]))
+        embed.add_field(name="Rank", value=rank[0]["tier"] + " " + rank[0]["rank"] if rank else "Unranked")
+        embed.add_field(name="Ranked W/L", value=rank[0]["wins"] + "/" + rank[0]["losses"] if rank else "Unranked")
+        embed.add_field(name="League Points", value=rank[0]["leaguePoints"] if rank else "Unranked")
+        # Finally, send the embed
         await ctx.send(embed=embed)
 
     @commands.command(aliases=["lm"])
