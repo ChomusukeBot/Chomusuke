@@ -1,11 +1,11 @@
 # Import the commands extension
+import datetime
 import discord
-from discord.ext import commands
+import json
 import os
 import requests
 from cog import Cog
-import json
-import datetime
+from discord.ext import commands
 
 # Base URL for all API calls
 BASE_URL = "https://{}.api.riotgames.com"
