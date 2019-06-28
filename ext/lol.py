@@ -146,9 +146,9 @@ class LeagueOfLegends(Cog):
         # Request the list of champions on the current version
         async with self.bot.session.get(CHAMPIONS_URL.format(self.version)) as resp:
             # Iterate over the characters on the response (but parse it first)
-            for champion in (await resp.json())["data"]:
+            for key, value in (await resp.json())["data"].items():
                 # Save the champion name
-                new_champs[champion["key"]] = champion["name"]
+                new_champs[value["key"]] = value["name"]
 
         # Finally replace the existing list of champions
         self.champions = new_champs
