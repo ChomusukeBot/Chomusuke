@@ -1,6 +1,7 @@
 # Import the commands extension
 import datetime
 import discord
+import logging
 import json
 import os
 import requests
@@ -115,6 +116,8 @@ MATCHMAKING_QUEUES = {
     1070: "Crash Site Odyssey Extraction: Onslaught game",
     1200: "Nexus Blitz - Nexus Blitz game"
 }
+# The information logger
+LOGGER: logging.Logger = logging.getLogger("chomusuke")
 
 
 class LeagueOfLegends(Cog):
@@ -352,4 +355,4 @@ def setup(bot):
     if "LEAGUE_TOKEN" in os.environ:
         bot.add_cog(LeagueOfLegends(bot))
     else:
-        print("No league api key available")
+        LOGGER.error("No League of Legends token has been specified, the Cog has not been loaded")
