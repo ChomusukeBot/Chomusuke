@@ -1,10 +1,11 @@
 # Import the commands extension
+import asyncio
 import datetime
 import discord
 import logging
 import os
 from cog import Cog
-from discord.ext import commands, tasks
+from discord.ext import commands
 
 # The color of the embeds
 COLOR = 0xEDB24C
@@ -128,35 +129,39 @@ class LeagueOfLegends(Cog):
         # Save our bot for later use
         self.bot = bot
         # Start the task to make sure that we have the values
-        self.update_values.start()
+        self.bot.loop.create_task(self.update_values())
         # Save the league api key and the current league version
         self.league_key = os.environ["LEAGUE_TOKEN"]
 
-    @tasks.loop(hours=1)
     async def update_values(self):
         """
         Task that updates the version and list of champions every hour.
         """
-        # Request the list of versions
-        async with self.bot.session.get(LEAGUE_VERSION) as resp:
-            # Parse the response as JSON and save the version
-            self.version = (await resp.json(content_type="binary/octet-stream"))[0]
+        # While the bot is not closed
+        while not self.bot.is_closed():
+            # Request the list of versions
+            async with self.bot.session.get(LEAGUE_VERSION) as resp:
+                # Parse the response as JSON and save the version
+                self.version = (await resp.json(content_type=None))[0]
 
-        # Create an empty dict with the character data
-        new_champs = {}
+            # Create an empty dict with the character data
+            new_champs = {}
 
-        # Request the list of champions on the current version
-        async with self.bot.session.get(CHAMPIONS_URL.format(self.version)) as resp:
-            # Iterate over the characters on the response (but parse it first)
-            for key, value in (await resp.json())["data"].items():
-                # Save the champion name
-                new_champs[value["key"]] = value["name"]
+            # Request the list of champions on the current version
+            async with self.bot.session.get(CHAMPIONS_URL.format(self.version)) as resp:
+                # Iterate over the characters on the response (but parse it first)
+                for key, value in (await resp.json())["data"].items():
+                    # Save the champion name
+                    new_champs[value["key"]] = value["name"]
 
-        # Replace the existing list of champions
-        self.champions = new_champs
+            # Replace the existing list of champions
+            self.champions = new_champs
 
-        # Finally log what we have done
-        LOGGER.info("League of Legends Version and Champion list has been update")
+            # Finally log what we have done
+            LOGGER.info("League of Legends Version and Champion list has been update")
+
+            # And wait an hour (60 seconds * 60 minutes = 1 hour)
+            await asyncio.sleep(60 * 60)
 
     @commands.group()
     async def lol(self, ctx):
