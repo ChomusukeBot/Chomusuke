@@ -52,13 +52,13 @@ class APIStatus(Cog):
     @commands.command(name="apistatus", aliases=["api", "status"])
     async def get_api_status(self, ctx):
         # guild = self.bot.get_guild(591570953771810820)
-
+        await ctx.send("Fetching status...this may take some time.")
         emoji1 = "\U00002705"
         emoji2 = "\U0001F6AB"
 
         riot_status = ""
         embed = discord.Embed(colour=discord.Colour.blue())
-        embed.title = "API status"
+        embed.title = "API statuses"
         for key, value in APIs.items():
             async with self.http_session.get(url=value) as response:
                 print(response.status)
@@ -76,7 +76,7 @@ class APIStatus(Cog):
                     riot_status += key + ", "
         riot_status = riot_status[:-2]
         if riot_status != "":
-            riot_status = " - except" + riot_status
+            riot_status = " - except " + riot_status
         embed.add_field(name="League of Legends", value=f"{emoji1}{riot_status}", inline=True)
         await ctx.send(embed=embed)
 
