@@ -19,7 +19,7 @@ SUMMONER_API = "/lol/summoner/v4/summoners/by-name/{}?api_key={}"
 # API Operation used to access summoner ranked data
 RANKED_API = "/lol/league/v4/entries/by-summoner/{}?api_key={}"
 # API Operation used to access summoner match history
-MATCHES_API = "/lol/match/v4/matchlists/by-account/{}?api_key={}"
+MATCHES_API = "/lol/match/v4/matchlists/by-account/{}?api_key={}&endIndex=1"
 # API Operation used to access a specific match
 MATCH_API = "/lol/match/v4/matches/{}?api_key={}"
 # A .json file storing the current and all previous versions of league of legends
@@ -175,14 +175,18 @@ class LeagueOfLegends(Cog):
             return
 
         # Request the summoner data
-        data = await self.get_summoner_data(REGIONS[region.lower()], summoner)
+        data = await self.get_summoner_data(region, summoner)
         # If there is no data available, notify the user and return
         if not data:
             await ctx.send("Summoner not found. Please double check that the you are using the summoner name and not the username.")
             return
 
+        # Patch the region
+        region = REGIONS[region.lower()]
+
         # Get the ranked data
-        rank = await self.get_ranked_data(REGIONS[region.lower()], data["id"])
+        async with self.bot.session.get(BASE_URL.format(region) + RANKED_API.format(data["id"], self.league_key)) as resp:
+            rank = await resp.json()
 
         # Create an embed to display summoner data
         embed = discord.Embed(title="Profile of " + data["name"], color=COLOR)
@@ -206,20 +210,25 @@ class LeagueOfLegends(Cog):
             await ctx.send("That region was not found. Please use one of the following:\n" + ", ".join(REGIONS.keys()))
             return
 
+        # Patch the current region
+        region = REGIONS[region.lower()]
+
         # Request the summoner data
-        data = await self.get_summoner_data(REGIONS[region.lower()], summoner)
+        data = await self.get_summoner_data(region, summoner)
         # If there is no data available, notify the user and return
         if not data:
             await ctx.send("Summoner not found. Please double check that the you are using the summoner name and not the username.")
             return
 
         # Get the match history
-        history = await self.get_match_history(REGIONS[region.lower()], data["accountId"], "endIndex=1")
+        async with self.bot.session.get(BASE_URL.format(region) + MATCHES_API.format(data["accountId"], self.league_key)) as resp:
+            history = await resp.json()
 
         # Iterate over the matches on the response
         for match_meta in history["matches"]:
             # Request the match information
-            match_data = await self.get_match_information(REGIONS[region.lower()], match_meta["gameId"])
+            async with self.bot.session.get(BASE_URL.format(region) + MATCH_API.format(match_meta["gameId"], self.league_key)) as resp:
+                match_data = await resp.json()
 
             # Grab the important match data
             mode = MATCHMAKING_QUEUES[match_data["queueId"]]
@@ -268,22 +277,10 @@ class LeagueOfLegends(Cog):
 
     async def get_summoner_data(self, region, summoner):
         # Run the response as usual
-        async with self.bot.session.get(BASE_URL.format(region) + SUMMONER_API.format(summoner, self.league_key)) as resp:
+        async with self.bot.session.get(BASE_URL.format(REGIONS[region.lower()]) + SUMMONER_API.format(summoner, self.league_key)) as resp:
             if resp.status == 200:
                 return await resp.json()
             return
-
-    async def get_ranked_data(self, region, id):
-        async with self.bot.session.get(BASE_URL.format(region) + RANKED_API.format(id, self.league_key)) as resp:
-            return await resp.json()
-
-    async def get_match_history(self, region, accountId, params):
-        async with self.bot.session.get(BASE_URL.format(region) + MATCHES_API.format(accountId, self.league_key), params=params) as resp:
-            return await resp.json()
-
-    async def get_match_information(self, region, matchId):
-        async with self.bot.session.get(BASE_URL.format(region) + MATCH_API.format(matchId, self.league_key)) as resp:
-            return await resp.json()
 
     def seconds_to_text(self, secs):
         days = secs//86400
