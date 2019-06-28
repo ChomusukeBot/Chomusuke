@@ -142,7 +142,7 @@ class LeagueOfLegends(Cog):
             # Request the list of versions
             async with self.bot.session.get(LEAGUE_VERSION) as resp:
                 # Parse the response as JSON and save the version
-                self.version = (await resp.json(content_type="binary/octet-stream"))[0]
+                self.version = (await resp.json(content_type=None))[0]
 
             # Create an empty dict with the character data
             new_champs = {}
