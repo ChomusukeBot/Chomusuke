@@ -2,9 +2,7 @@
 import datetime
 import discord
 import logging
-import json
 import os
-import requests
 from cog import Cog
 from discord.ext import commands, tasks
 
@@ -127,14 +125,11 @@ class LeagueOfLegends(Cog):
     def __init__(self, bot):
         # Save our bot for later use
         self.bot = bot
+        # Create some placeholders until the first update triggers
+        self.version = "9.13.1"
+        self.champions = {}
         # Save the league api key and the current league version
         self.league_key = os.environ["LEAGUE_TOKEN"]
-        # Save the champion names and champion keys for faster access
-        champions = json.loads(requests.get(CHAMPIONS_URL.format(self.version)).text).get("data")
-        champNames = {}
-        for champ in champions:
-            champNames[champions.get(champ).get("key")] = champions.get(champ).get("id")
-        self.champNames = champNames
 
     @tasks.loop(hours=1)
     async def update_values(self):
@@ -145,6 +140,19 @@ class LeagueOfLegends(Cog):
         async with self.bot.session.get(LEAGUE_VERSION) as resp:
             # Parse the response as JSON and save the version
             self.version = await resp.json()[0]
+
+        # Create an empty dict with the character data
+        new_champs = {}
+
+        # Request the list of champions on the current version
+        async with self.bot.session.get(CHAMPIONS_URL.format(self.version)) as resp:
+            # Iterate over the characters on the response (but parse it first)
+            for champion in (await resp.json())["data"]:
+                # Save the champion name
+                new_champs[champion["key"]] = champion["name"]
+
+        # Finally replace the existing list of champions
+        self.champions = new_champs
 
     @commands.command(aliases=["lp"])
     async def lolprofile(self, ctx, region, summonerName):
@@ -276,7 +284,7 @@ class LeagueOfLegends(Cog):
                     fourth = self.getPlayerString(self, player, "BOTTOM", "DUO_CARRY")
                 if(player.get("lane") == "BOTTOM" and player.get("role") == "DUO_SUPPORT"):
                     fifth = self.getPlayerString(self, player, "BOTTOM", "DUO_SUPPORT")
-                blueTeamString += "{} - {} ({}/{}/{})\n".format(player.get("summonerName"), self.champNames.get(player.get("champion")),
+                blueTeamString += "{} - {} ({}/{}/{})\n".format(player.get("summonerName"), self.champions.get(player.get("champion")),
                                                                 player.get("kills"), player.get("deaths"), player.get("assists"))
             blueTeamSorted = blueTeamString
             try:
@@ -298,7 +306,7 @@ class LeagueOfLegends(Cog):
                     fourth = self.getPlayerString(self, player, "BOTTOM", "DUO_CARRY")
                 if(player.get("lane") == "BOTTOM" and player.get("role") == "DUO_SUPPORT"):
                     fifth = self.getPlayerString(self, player, "BOTTOM", "DUO_SUPPORT")
-                redTeamString += "{} - {} ({}/{}/{})\n".format(player.get("summonerName"), self.champNames.get(player.get("champion")),
+                redTeamString += "{} - {} ({}/{}/{})\n".format(player.get("summonerName"), self.champions.get(player.get("champion")),
                                                                player.get("kills"), player.get("deaths"), player.get("assists"))
             redTeamSorted = redTeamString
             try:
@@ -339,7 +347,7 @@ class LeagueOfLegends(Cog):
     def getPlayerString(self, ctx, player, lane, role):
         if(player.get("lane") == lane):
             if(player.get("role") == role):
-                return "{} - {} ({}/{}/{})\n".format(player.get("summonerName"), self.champNames.get(player.get("champion")),
+                return "{} - {} ({}/{}/{})\n".format(player.get("summonerName"), self.champions.get(player.get("champion")),
                                                      player.get("kills"), player.get("deaths"), player.get("assists"))
             else:
                 return ""
