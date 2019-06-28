@@ -1,5 +1,5 @@
 <div align="center">
-<!-- <img src="https://raw.githubusercontent.com/justalemon/Chomusuke/master/logo.png" width="750" /> -->
+<img src="https://raw.githubusercontent.com/justalemon/Chomusuke/master/logo.png" width="250" />
 <br><br>
 <a href="https://heroku.com/deploy?template=https://github.com/justalemon/Chomusuke"><img src="https://img.shields.io/badge/heroku-deploy-430098.svg"></a>
 <a href="https://discordapp.com/oauth2/authorize?client_id=591581275429666847&scope=bot&permissions=2080763015"><img src="https://img.shields.io/badge/discord-invite-7289DA.svg"></a>
