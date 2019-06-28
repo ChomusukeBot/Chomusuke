@@ -59,6 +59,13 @@ class GitHub(Repo):
         """
         A set of commands to get information from GitHub.
         """
+        # If there was no subcommands invoked and there is a Client ID
+        if not ctx.invoked_subcommand and PARAMETERS["client_id"]:
+            # Generate the auth URL
+            redirect = f"https://chomusuke.justalemon.ml/{ctx.author.id}/github"
+            url = "https://github.com/login/oauth/authorize?client_id={0}&redirect_uri={1}".format(PARAMETERS["client_id"], redirect)
+            # Then send the URL
+            await ctx.send(url)
 
     @github.command(aliases=["r"])
     async def repo(self, ctx, repo_name: str, author: str = None):
