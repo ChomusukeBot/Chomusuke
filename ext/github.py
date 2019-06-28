@@ -33,6 +33,7 @@ class GitHub(Repo):
         # Call the normal function
         super().__init__(*args, **kwargs)
         # Add the commands to our group
+        self.github.add_command(self.pick)
         self.github.add_command(self.repos)
 
     async def format_repos(self, json: dict):
