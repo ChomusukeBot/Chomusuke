@@ -7,7 +7,11 @@ import sys
 from bot import Chomusuke
 from discord.ext import commands
 from dotenv import load_dotenv
-from web import WebServer
+try:
+    from web import WebServer
+    web_available = True
+except ImportError:
+    web_available = False
 
 # The information logger
 LOGGER: logging.Logger = logging.getLogger("chomusuke")
@@ -66,7 +70,10 @@ def main():
 
     # Create our bot and web server instance
     bot = Chomusuke(**kwargs)
-    web = WebServer(bot)
+    if web_available:
+        web = WebServer(bot)
+    else:
+        LOGGER.warning("The web server could not be initialized because sanic is not installed")
 
     # Iterate over the python files from the ext folder
     for file in [x for x in os.listdir("ext") if x.endswith(".py")]:
@@ -89,7 +96,7 @@ def main():
         # Log and connect the user
         loop.run_until_complete(bot.login(os.environ["DISCORD_TOKEN"]))
         # If the user wants the web server, generate it and start serving
-        if args.web:
+        if args.web and web_available:
             LOGGER.info("Starting Sanic web server")
             server = loop.run_until_complete(web.create_server(host=os.environ.get("SANIC_HOST", "0.0.0.0"),
                                                                port=int(os.environ.get("SANIC_PORT", 80)),
