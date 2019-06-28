@@ -162,7 +162,7 @@ class Overwatch(Cog):
         return embed
 
     @commands.command(aliases=["ow_stats", "ow"])
-    async def get_overwatch_stats(self, ctx, player=None, platform="pc", region="global"):
+    async def overwatch(self, ctx, player=None, platform="pc", region="global"):
         """
             Command to get the stats for a given player on a given platform.
         """
