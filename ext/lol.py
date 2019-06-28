@@ -210,15 +210,15 @@ class LeagueOfLegends(Cog):
             await ctx.send("That region was not found. Please use one of the following:\n" + ", ".join(REGIONS.keys()))
             return
 
-        # Patch the current region
-        region = REGIONS[region.lower()]
-
         # Request the summoner data
         data = await self.get_summoner_data(region, summoner)
         # If there is no data available, notify the user and return
         if not data:
             await ctx.send("Summoner not found. Please double check that the you are using the summoner name and not the username.")
             return
+
+        # Patch the current region
+        region = REGIONS[region.lower()]
 
         # Get the match history
         async with self.bot.session.get(BASE_URL.format(region) + MATCHES_API.format(data["accountId"], self.league_key)) as resp:
@@ -233,8 +233,8 @@ class LeagueOfLegends(Cog):
             # Grab the important match data
             mode = MATCHMAKING_QUEUES[match_data["queueId"]]
             duration = match_data["gameDuration"]
-            timestamp = match_data["gameCreation"]
-            time = self.seconds_to_text(duration)
+            timestamp = datetime.datetime.fromtimestamp(match_data["gameCreation"] / 1000)
+            duration = datetime.datetime.min + datetime.timedelta(seconds=duration)
 
             # Split the two teams to process their data
             blue = (match_data["participants"][:5], match_data["participantIdentities"][:5])
@@ -243,18 +243,17 @@ class LeagueOfLegends(Cog):
             blue_data = await self.format_match_data(*blue)
             red_data = await self.format_match_data(*red)
 
-            # TimeStamp calculation
-            currentTime = datetime.datetime.now()
-            elapsedDays = currentTime - datetime.datetime.fromtimestamp(timestamp/1000.0)
-            if(elapsedDays.days == 0):
-                timeStamp = "today"
-            elif(elapsedDays.days == 1):
-                timeStamp = "1 day ago"
+            # Calculate the days ago that the game was played
+            elapsed = datetime.datetime.now() - timestamp
+            # If the elapsed days equals zero, the match was played today
+            if elapsed.days == 0:
+                stamp = "today"
+            # Otherwise
             else:
-                timeStamp = str(elapsedDays.days) + " days ago"
+                stamp = f"{elapsed.days} day(s) ago"
 
             # Create the embed to add the data
-            embed = discord.Embed(title=mode + " ({})".format(timeStamp), description="Game duration: " + time, color=COLOR)
+            embed = discord.Embed(title=f"{mode} ({stamp})", description="Game duration: " + duration.strftime("%H:%M:%S"), color=COLOR)
             # Add the fields with the information
             embed.add_field(name="🔵 BLUE TEAM 🔵", value=blue_data, inline=False)
             embed.add_field(name="🔴 RED TEAM 🔴", value=red_data, inline=False)
@@ -281,15 +280,6 @@ class LeagueOfLegends(Cog):
             if resp.status == 200:
                 return await resp.json()
             return
-
-    def seconds_to_text(self, secs):
-        days = secs//86400
-        hours = (secs - days*86400)//3600
-        minutes = (secs - days*86400 - hours*3600)//60
-        seconds = secs - days*86400 - hours*3600 - minutes*60
-        result = (("{} days, ".format(days) if days else "") + ("{}:".format(hours) if hours else "")
-                  + ("{}".format(minutes) if minutes else "") + (":{} ".format(seconds) if seconds else ""))
-        return result
 
 
 def setup(bot):
