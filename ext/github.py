@@ -206,7 +206,9 @@ def setup(bot):
     """
     Our function called to add the cog to our bot.
     """
-    if bot.mongo:
-        bot.add_cog(GitHub(bot, "github", "Bearer", HEADERS, ENDPOINTS, False))
-    else:
+    if not bot.mongo:
         LOGGER.error(f"{GitHub} has not been loaded because MongoDB is required")
+    elif "GITHUB_ID" not in os.environ or "GITHUB_SECRET" not in os.environ:
+        LOGGER.error(f"{GitHub} has not been loaded because a GitHub Client ID/Secret is required")
+    else:
+        bot.add_cog(GitHub(bot, "github", "Bearer", HEADERS, ENDPOINTS, False))
