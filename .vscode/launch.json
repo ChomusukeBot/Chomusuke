@@ -21,12 +21,15 @@
             ]
         },
         {
-            "name": "No .env",
+            "name": "No Web Server",
             "type": "python",
             "request": "launch",
             "program": "${workspaceFolder}/launch.py",
             "console": "integratedTerminal",
-            "envFile": ""
+            "envFile": "",
+            "args": [
+                "--no-web"
+            ]
         }
     ]
 }

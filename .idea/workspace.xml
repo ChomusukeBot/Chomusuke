@@ -3,7 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="ba5a62ce-a303-4b51-9050-465fd4e2385d" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.vscode/launch.json" beforeDir="false" afterPath="$PROJECT_DIR$/.vscode/launch.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/launch.py" beforeDir="false" afterPath="$PROJECT_DIR$/launch.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -16,8 +15,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/launch.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="170">
-              <caret line="15" lean-forward="true" selection-start-line="15" selection-end-line="15" />
+            <state relative-caret-position="306">
+              <caret line="26" selection-start-line="26" selection-end-line="26" />
             </state>
           </provider>
         </entry>
@@ -81,7 +80,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.Normal Run">
+  <component name="RunManager" selected="Python.No Web Server">
     <configuration name="Manual .env" type="PythonConfigurationType" factoryName="Python">
       <module name="Chomusuke" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -113,7 +112,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="No .env" type="PythonConfigurationType" factoryName="Python">
+    <configuration name="No Web Server" type="PythonConfigurationType" factoryName="Python">
       <module name="Chomusuke" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -136,7 +135,7 @@
         </ENTRIES>
       </EXTENSION>
       <option name="SCRIPT_NAME" value="launch.py" />
-      <option name="PARAMETERS" value="" />
+      <option name="PARAMETERS" value="--no-web" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
@@ -179,7 +178,7 @@
     <list>
       <item itemvalue="Python.Normal Run" />
       <item itemvalue="Python.Manual .env" />
-      <item itemvalue="Python.No .env" />
+      <item itemvalue="Python.No Web Server" />
     </list>
   </component>
   <component name="SvnConfiguration">
@@ -197,6 +196,7 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1382" height="744" extended-state="6" />
+    <editor active="true" />
     <layout>
       <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.1688988" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
@@ -220,8 +220,8 @@
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/launch.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="170">
-          <caret line="15" lean-forward="true" selection-start-line="15" selection-end-line="15" />
+        <state relative-caret-position="306">
+          <caret line="26" selection-start-line="26" selection-end-line="26" />
         </state>
       </provider>
     </entry>
