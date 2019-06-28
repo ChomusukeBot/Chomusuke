@@ -194,13 +194,6 @@ class Overwatch(Cog):
             return await ctx.send("Something went wrong when attempting to contact the Overwatch API.")
         return await ctx.send(embed=embed)
 
-    @commands.command(aliases=["ow_status", "ows"])
-    async def overwatch_status(self, ctx):
-        status = await self.api.status()
-        if status != 200:
-            return await ctx.send("Overwatch API functioning normally! 👍")
-        return await ctx.send(f"Something is wrong with the overwatch API! Got status `{status}`")
-
 
 def setup(bot):
     bot.add_cog(Overwatch(bot))
