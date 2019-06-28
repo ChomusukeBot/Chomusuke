@@ -55,6 +55,16 @@ class GitHub(Repo):
         """
         return "justalemon"
 
+    async def check_repo(self, slug: str):
+        """
+        Checks if the specified repo is valid.
+        """
+        async with self.bot.session.get(f"https://api.github.com/repos/{slug}", headers=HEADERS, params=PARAMETERS) as resp:
+            if resp.status != 200:
+                return
+            json = await resp.json()
+            return {json["full_name"]: json["default_branch"]}
+
     @commands.group()
     async def github(self, ctx):
         """
