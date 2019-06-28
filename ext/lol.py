@@ -156,8 +156,14 @@ class LeagueOfLegends(Cog):
         # Finally log what we have done
         LOGGER.info("League of Legends Version and Champion list has been update")
 
-    @commands.command(aliases=["lp"])
-    async def lolprofile(self, ctx, region, summonerName):
+    @commands.group()
+    async def lol(self, ctx):
+        """
+        Commands to interact with League of Legends profiles and matches.
+        """
+
+    @lol.command(aliases=["lp"])
+    async def profile(self, ctx, region, summonerName):
         """
         Displays a summoner's profile.
         """
