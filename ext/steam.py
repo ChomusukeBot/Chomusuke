@@ -1,16 +1,18 @@
 # Import the commands extension
 import discord
-from discord.ext import commands
+import logging
 import os
+from discord.ext import commands
 from cog import Cog
 
+# Base URL and endpoints
 BASE_URL = "https://api.steampowered.com"
 PROFILE_API = "/ISteamUser/GetPlayerSummaries/v0002/?key={}&steamids={}"
 CSGO_API = "/ISteamUserStats/GetUserStatsForGame/v0002/?appid=730&key={}&steamid={}"
 TFII_API = "/ISteamUserStats/GetUserStatsForGame/v0002/?appid=440&key={}&steamid={}"
 RUST_API = "/ISteamUserStats/GetUserStatsForGame/v0002/?appid=252490&key={}&steamid={}"
-
-# cog stuff
+# The information logger
+LOGGER: logging.Logger = logging.getLogger("chomusuke")
 
 
 class Steam(Cog):
@@ -194,10 +196,7 @@ class Steam(Cog):
 
 # setup the bot ith cog
 def setup(bot):
-
     if "STEAM_TOKEN" in os.environ:
-        # if steam token findable launch the cog
         bot.add_cog(Steam(bot))
-
     else:
-        print("No steam api key available")
+        LOGGER.error(f"{Steam} has not been loaded because MongoDB is required")

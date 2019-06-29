@@ -40,7 +40,6 @@ class APIStatus(Cog):
         embed.title = "API statuses"
         for key, value in APIs.items():
             async with self.bot.session.get(url=value) as response:
-                print(response.status)
                 if response.status == 200:
                     embed.add_field(name=f"{key} API", value=emoji1, inline=True)
                 else:
@@ -48,7 +47,6 @@ class APIStatus(Cog):
         for key, value in REGIONS.items():
             url = BASE_URL.format(value) + SHARD_STATUS_URL.format(ALL_AUTH["api_key"])
             async with self.bot.session.get(url=url) as response:
-                print(response.status)
                 if response.status == 200:
                     pass
                 else:
