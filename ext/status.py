@@ -20,7 +20,7 @@ BASE_URL = "https://{}.api.riotgames.com"
 SHARD_STATUS_URL = "/lol/status/v3/shard-data?api_key={}"
 
 
-class APIStatus(Cog):
+class Status(Cog):
     """
     A cog that monitors API status.
     """
@@ -62,4 +62,4 @@ def setup(bot):
     """
     Our function called to add the cog to our bot.
     """
-    bot.add_cog(APIStatus(bot))
+    bot.add_cog(Status(bot))
