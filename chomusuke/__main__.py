@@ -51,6 +51,11 @@ def main():
         print("Error: You need to specify a configuration system")
         sys.exit(2)
 
+    # Then, create a instance for the bot
+    bot = Chomusuke(config["prefix"])
+    # And start the bot
+    bot.run(config["token"])
+
 
 if __name__ == "__main__":
     main()
