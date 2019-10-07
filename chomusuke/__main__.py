@@ -5,6 +5,24 @@ import sys
 
 from .bot import Chomusuke
 
+LOGGER = logging.getLogger("chomusuke")
+
+
+def configure_logging():
+    """
+    Configures the logging system of the bot.
+    """
+    # Set the logger level to INFO
+    LOGGER.setLevel(logging.INFO)
+    # Create a stream logger for sending messages to STDOUT
+    stream = logging.StreamHandler()
+    stream.setLevel(logging.INFO)
+    # Then, we need a formatter to make the messages pretty
+    formatter = logging.Formatter("[%(asctime)s] [%(levelname)s] [%(filename)s] %(message)s")
+    stream.setFormatter(formatter)
+    # Finally, add the formatter so is processed
+    LOGGER.addHandler(stream)
+
 
 def config_from_env():
     """
@@ -54,6 +72,8 @@ def main():
     """
     Executes the bot from the command line.
     """
+    # Configure the logging system
+    configure_logging()
     # Get the parsed command line arguments
     args = parse_args()
 
