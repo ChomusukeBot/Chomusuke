@@ -2,6 +2,7 @@ import argparse
 import json
 import logging
 import os
+import platform
 import sys
 
 from .__init__ import __version__ as version
@@ -81,7 +82,7 @@ def main():
     # Configure the logging system
     configure_logging()
     # And notify the user that we are starting the bot
-    LOGGER.info(f"Booting up Chomusuke v{version}")
+    LOGGER.info(f"Starting up Chomusuke v{version} on {platform.platform()}")
 
     # Get the parsed command line arguments
     args = parse_args()
