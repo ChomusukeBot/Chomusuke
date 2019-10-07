@@ -1,8 +1,10 @@
 import argparse
 import json
+import logging
 import os
 import sys
 
+from .__init__ import __version__ as version
 from .bot import Chomusuke
 
 LOGGER = logging.getLogger("chomusuke")
@@ -28,6 +30,8 @@ def config_from_env():
     """
     Generates a dict with configuration values from the environment variables.
     """
+    # Notify the user
+    LOGGER.info("Loading configuration values from environment variables...")
     # Create a dictionary with the info that we need
     output = {
         "token": os.environ["DISCORD_TOKEN"],
@@ -41,13 +45,15 @@ def config_from_json(file):
     """
     Generates a dict with configuration values from a JSON file.
     """
+    # Notify the user about the loading
+    LOGGER.info(f"Loading JSON configuration from {file}")
     # Open the file for reading
     with open(file):
         # Get the contents as JSON
         output = json.load(file)
     # If there is no token saved, notify the user and return
     if "token" not in output:
-        print("Error: There is no token in the JSON configuration")
+        LOGGER.critical("No token was found in the JSON configuration file.")
         sys.exit(4)
     # If everything succeeds, return the output
     return output
@@ -74,14 +80,19 @@ def main():
     """
     # Configure the logging system
     configure_logging()
+    # And notify the user that we are starting the bot
+    LOGGER.info(f"Booting up Chomusuke v{version}")
+
     # Get the parsed command line arguments
     args = parse_args()
 
     # If the user wants the config from environment variables
     if args.env:
-        # If there is no token on the environment variables, exit
+        # If there is no token on the environment variables
         if "DISCORD_TOKEN" not in os.environ:
-            pass
+            # Notify the user and exit
+            LOGGER.critical(f"No token was found on the environment variables (DISCORD_TOKEN).")
+            sys.exit(1)
 
         # Otherwise, load the configuration
         config = config_from_env()
@@ -90,15 +101,17 @@ def main():
         # If the JSON file does not exists
         if not os.path.isfile(args.json):
             # Notify the user and return
-            print(f"Error: The JSON Configuration file was not found ({args.json})")
+            LOGGER.critical(f"The JSON Configuration file was not found ({args.json}).")
             sys.exit(3)
         # Otherwise, get the configuration
         config = config_from_json(args.json)
     # If there is no configuration type specified
     else:
-        print("Error: You need to specify a configuration system")
+        LOGGER.critical("No configuration system was specified.")
         sys.exit(2)
 
+    # Notify the user that we got everything and we are starting the bot
+    LOGGER.info("Configuration loaded, booting up...")
     # Then, create a instance for the bot
     bot = Chomusuke(config["prefix"])
     # And start the bot
