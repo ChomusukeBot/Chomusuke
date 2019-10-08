@@ -1,4 +1,5 @@
 import argparse
+import asyncio
 import json
 import logging
 import os
@@ -37,7 +38,12 @@ def config_from_env():
     output = {
         "token": os.environ["DISCORD_TOKEN"],
         "prefix": os.environ.get("DISCORD_PREFIX", "&"),
-        "cogs": os.environ.get("DISCORD_COGS", "").split(",")
+        "cogs": os.environ.get("DISCORD_COGS", "").split(","),
+        "web": {
+            "enabled": bool(os.environ.get("WEBSERVER_USE", "")),
+            "host": os.environ.get("WEBSERVER_HOST", "0.0.0.0"),
+            "port": int(os.environ.get("WEBSERVER_PORT", "4810"))
+        }
     }
     # And return it
     return output
@@ -112,8 +118,11 @@ def main():
         LOGGER.critical("No configuration system was specified.")
         sys.exit(2)
 
+    # Get the event loop
+    loop = asyncio.get_event_loop()
     # Then, create a instance for the bot
-    bot = Chomusuke(config["prefix"])
+    bot = Chomusuke(config["prefix"], loop=loop, use_web=config["web"]["enabled"],
+                    web_host=config["web"]["host"], web_port=config["web"]["port"])
 
     # If there are cogs in the configuration
     if "cogs" in config:
@@ -133,8 +142,23 @@ def main():
 
     # Notify the user that we got everything and we are starting the bot
     LOGGER.info("Everything ready! Booting up...")
-    # And start the bot
-    bot.run(config["token"])
+
+    # Start processing everything
+    try:
+        # Log and connect the user
+        loop.run_until_complete(bot.login(config["token"]))
+        # And connect the bot to Discord
+        loop.run_until_complete(bot.connect())
+    except KeyboardInterrupt:
+        # After a CTRL+C or CTRL+Z, log out the bot and disconnect everything
+        loop.run_until_complete(bot.logout())
+    finally:
+        # After the bot finishes (or crashing), grab all tasks
+        tasks = asyncio.all_tasks(loop)
+        # Run all of the tasks until they have been completed
+        loop.run_until_complete(asyncio.gather(*tasks))
+        # After the tasks have been completed, close the loop
+        loop.close()
 
 
 if __name__ == "__main__":
