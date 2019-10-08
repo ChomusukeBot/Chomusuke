@@ -3,8 +3,9 @@ import importlib
 import inspect
 import logging
 
-import sanic
-from discord.ext.commands import AutoShardedBot, Cog
+from discord.ext.commands import AutoShardedBot
+
+from .web import WebServer
 
 LOGGER = logging.getLogger("chomusuke")
 
@@ -30,7 +31,7 @@ class Chomusuke(AutoShardedBot):
             # Notify the user that the server is OK
             LOGGER.info(f"Starting Sanic Web Server at {host}:{port}")
             # And create the server instance
-            self.server = sanic.Sanic()
+            self.server = WebServer(bot=self)
             coro = self.server.create_server(host=host, port=port, return_asyncio_server=True)
             self.loop.run_until_complete(asyncio.ensure_future(coro, loop=self.loop))
         # Otherwise
