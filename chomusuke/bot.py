@@ -5,6 +5,7 @@ import logging
 
 from discord.ext.commands import AutoShardedBot
 
+from .endpoint import DefaultEndpoint
 from .web import WebServer
 
 LOGGER = logging.getLogger("chomusuke")
@@ -34,6 +35,7 @@ class Chomusuke(AutoShardedBot):
             self.server = WebServer(bot=self)
             coro = self.server.create_server(host=host, port=port, return_asyncio_server=True)
             self.loop.run_until_complete(asyncio.ensure_future(coro, loop=self.loop))
+            self.server.add_route(DefaultEndpoint.as_view(), "/")
         # Otherwise
         else:
             # Tell the user that there is no web server
