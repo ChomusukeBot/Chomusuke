@@ -1,1 +1,5 @@
 discord.py==1.2.3
+sanic==19.6.3
+# Discord.py requires 6.0, but sanic requires 7.0
+# Let's use 7.0 unless something break
+websockets==7.0
