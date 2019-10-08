@@ -1,7 +1,9 @@
+import asyncio
 import importlib
 import inspect
 import logging
 
+import sanic
 from discord.ext.commands import AutoShardedBot, Cog
 
 LOGGER = logging.getLogger("chomusuke")
@@ -11,6 +13,34 @@ class Chomusuke(AutoShardedBot):
     """
     Base class for everything bot related.
     """
+    def __init__(self, *args, **kwargs):
+        """
+        Initializes a new instance of the Chomusuke bot.
+        """
+        # Call the default Bot init
+        super().__init__(*args, **kwargs)
+
+        # Try to get the settings for the web server
+        host = kwargs.pop("web_host", "0.0.0.0")
+        port = kwargs.pop("web_port", 4810)
+        web = kwargs.pop("use_web", False)
+
+        # If the user wants the web server
+        if web:
+            # Notify the user that the server is OK
+            LOGGER.info(f"Starting Sanic Web Server at {host}:{port}")
+            # And create the server instance
+            self.server = sanic.Sanic()
+            coro = self.server.create_server(host=host, port=port, return_asyncio_server=True)
+            self.loop.run_until_complete(asyncio.ensure_future(coro, loop=self.loop))
+        # Otherwise
+        else:
+            # Tell the user that there is no web server
+            LOGGER.warning("The Sanic Web Server is disabled")
+            LOGGER.warning("Cogs that require callbacks and return endpoints might not work")
+            # And set the server to nothing
+            self.server = None
+
     def import_cog(self, name: str):
         """
         Imports a cog with importlib and adds it to a.
