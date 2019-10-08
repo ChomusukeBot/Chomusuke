@@ -36,7 +36,8 @@ def config_from_env():
     # Create a dictionary with the info that we need
     output = {
         "token": os.environ["DISCORD_TOKEN"],
-        "prefix": os.environ.get("DISCORD_PREFIX", "&")
+        "prefix": os.environ.get("DISCORD_PREFIX", "&"),
+        "cogs": os.environ.get("DISCORD_COGS", "").split(",")
     }
     # And return it
     return output
@@ -111,10 +112,27 @@ def main():
         LOGGER.critical("No configuration system was specified.")
         sys.exit(2)
 
-    # Notify the user that we got everything and we are starting the bot
-    LOGGER.info("Configuration loaded, booting up...")
     # Then, create a instance for the bot
     bot = Chomusuke(config["prefix"])
+
+    # If there are cogs in the configuration
+    if "cogs" in config:
+        # Iterate over the cogs
+        for cog in config["cogs"]:
+            # If the cog is an empty string
+            if cog == "":
+                # Skip this iteration and continue
+                continue
+
+            # And try to import them
+            try:
+                bot.import_cog(cog)
+            # If we failed
+            except Exception as e:
+                LOGGER.error(f"Error while loading {cog}: {type(e).__name__} - {str(e)}")
+
+    # Notify the user that we got everything and we are starting the bot
+    LOGGER.info("Everything ready! Booting up...")
     # And start the bot
     bot.run(config["token"])
 
