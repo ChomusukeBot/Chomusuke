@@ -23,6 +23,7 @@ class Chomusuke(AutoShardedBot):
         host = kwargs.pop("web_host", "0.0.0.0")
         port = kwargs.pop("web_port", 4810)
         web = kwargs.pop("use_web", False)
+        db = kwargs.pop("database", "")
 
         # Call the default Bot init
         super().__init__(*args, **kwargs)
