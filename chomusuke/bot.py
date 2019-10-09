@@ -4,6 +4,7 @@ import inspect
 import logging
 
 from discord.ext.commands import AutoShardedBot
+from motor.motor_asyncio import AsyncIOMotorClient
 
 from .endpoint import DefaultEndpoint
 from .web import WebServer
@@ -27,6 +28,25 @@ class Chomusuke(AutoShardedBot):
 
         # Call the default Bot init
         super().__init__(*args, **kwargs)
+
+        # If the user wants a MongoDB instance
+        if db:
+            # Notify the user that the database is being initialized
+            LOGGER.info("Initializing MongoDB instance")
+            # Create the Motor/MongoDB instance
+            self.mongo = AsyncIOMotorClient(db)
+            # Make sure that the the database is valid by calling a simple command
+            self.mongo.admin.command("ismaster")
+            # And save the bot database
+            self.db = self.mongo.chomusuke
+        # Otherwise
+        else:
+            # Tell the user that there is no database available
+            LOGGER.warning("The MongoDB instance is disabled")
+            LOGGER.warning("Cogs that require storing any type of data might not work")
+            # And set the database to nothing
+            self.mongo = None
+            self.db = None
 
         # If the user wants the web server
         if web:
