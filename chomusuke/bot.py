@@ -19,13 +19,13 @@ class Chomusuke(AutoShardedBot):
         """
         Initializes a new instance of the Chomusuke bot.
         """
-        # Call the default Bot init
-        super().__init__(*args, **kwargs)
-
         # Try to get the settings for the web server
         host = kwargs.pop("web_host", "0.0.0.0")
         port = kwargs.pop("web_port", 4810)
         web = kwargs.pop("use_web", False)
+
+        # Call the default Bot init
+        super().__init__(*args, **kwargs)
 
         # If the user wants the web server
         if web:
