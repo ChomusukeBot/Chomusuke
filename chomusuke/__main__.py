@@ -41,7 +41,7 @@ def config_from_env():
         "cogs": os.environ.get("DISCORD_COGS", "").split(","),
         "web": {
             "enabled": bool(os.environ.get("WEBSERVER_USE", "")),
-            "host": os.environ.get("WEBSERVER_HOST", "0.0.0.0"),
+            "host": os.environ.get("WEBSERVER_HOST", "0.0.0.0"),  # nosec
             "port": int(os.environ.get("WEBSERVER_PORT", "4810"))
         },
         "database": os.environ.get("MONGODB_URL", "")
