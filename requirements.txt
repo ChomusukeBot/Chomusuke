@@ -1,4 +1,4 @@
-discord.py==1.2.3
+discord.py==1.2.4
 sanic==19.9.0
 motor==2.0.0
 dnspython==1.16.0
