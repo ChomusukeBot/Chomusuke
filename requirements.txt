@@ -1,5 +1,5 @@
 discord.py==1.2.5
-sanic==19.12.0
+sanic==19.12.2
 motor==2.1.0
 dnspython==1.16.0
 # Discord.py requires 6.0, but sanic requires 7.0
