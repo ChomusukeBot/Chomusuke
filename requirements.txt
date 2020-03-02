@@ -1,7 +1,3 @@
 discord.py==1.3.2
-sanic==19.12.2
 motor==2.1.0
 dnspython==1.16.0
-# Discord.py requires 6.0, but sanic requires 7.0
-# Let's use 7.0 unless something break
-websockets==7.0

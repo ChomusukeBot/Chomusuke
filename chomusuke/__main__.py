@@ -39,11 +39,6 @@ def config_from_env():
         "token": os.environ["DISCORD_TOKEN"],
         "prefix": os.environ.get("DISCORD_PREFIX", "&"),
         "cogs": os.environ.get("DISCORD_COGS", "").split(","),
-        "web": {
-            "enabled": bool(os.environ.get("WEBSERVER_USE", "")),
-            "host": os.environ.get("WEBSERVER_HOST", "0.0.0.0"),  # nosec
-            "port": int(os.environ.get("WEBSERVER_PORT", "4810"))
-        },
         "database": os.environ.get("MONGODB_URL", "")
     }
     # And return it
@@ -122,9 +117,7 @@ def main():
     # Get the event loop
     loop = asyncio.get_event_loop()
     # Then, create a instance for the bot
-    bot = Chomusuke(config["prefix"], loop=loop, use_web=config["web"]["enabled"],
-                    web_host=config["web"]["host"], web_port=config["web"]["port"],
-                    database=config["database"])
+    bot = Chomusuke(config["prefix"], loop=loop, database=config["database"])
 
     # If there are cogs in the configuration
     if "cogs" in config:

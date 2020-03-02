@@ -10,12 +10,6 @@ class FeatureRequired(ChomusukeException):
     """
 
 
-class WebServerRequired(FeatureRequired):
-    """
-    Exception raised when a Cog requires the Sanic Web Server but is not available or is disabled.
-    """
-
-
 class DatabaseRequired(FeatureRequired):
     """
     Exception raised when a Cog requires a MongoDB instance but is not available or is disabled.
