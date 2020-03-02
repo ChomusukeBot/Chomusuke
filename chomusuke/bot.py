@@ -68,3 +68,10 @@ class Chomusuke(AutoShardedBot):
 
         # If we got here, call add_cog
         self.add_cog(cog(self))
+
+    async def on_ready(self):
+        """
+        Event executed when Chomusuke is ready to work.
+        """
+        # Log a message about it
+        LOGGER.info("Bot is ready to work!")
