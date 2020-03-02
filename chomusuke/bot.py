@@ -2,8 +2,10 @@ import importlib
 import inspect
 import logging
 
-from discord.ext.commands import AutoShardedBot
+from discord.ext.commands import AutoShardedBot, Context
 from motor.motor_asyncio import AsyncIOMotorClient
+
+from chomusuke.exceptions import DatabaseRequired
 
 LOGGER = logging.getLogger("chomusuke")
 
@@ -41,6 +43,9 @@ class Chomusuke(AutoShardedBot):
             self.mongo = None
             self.db = None
 
+        # Create a dictionary of settings
+        self.settings = {}
+
     def import_cog(self, name: str):
         """
         Imports a cog with importlib and adds it to a.
@@ -75,3 +80,75 @@ class Chomusuke(AutoShardedBot):
         """
         # Log a message about it
         LOGGER.info("Bot is ready to work!")
+
+    async def save_setting(self, ctx: Context, setting: str, value):
+        """
+        Saves the specified setting.
+        :param ctx: The Context of the command.
+        :param setting: The name of the setting to store.
+        :param value: The value to store.
+        """
+        # If the setting is not registered, throw an exception
+        if setting not in self.settings:
+            raise ValueError("The setting does not exists.")
+
+        # Get the type of the setting
+        _type = self.settings[setting]
+
+        # if the passed object is not the correct type, raise an exception
+        if not isinstance(value, _type):
+            raise TypeError("The object does not matches the type of the setting.")
+
+        # Create the filter and update
+        _filter = {"_id": str(ctx.guild.id)}
+        update = {"$set": {setting: value}}
+        # If we got here, add or update the item
+        self.db["settings"].update_one(_filter, update, upsert=True)
+
+    async def get_setting(self, ctx: Context, setting: str, default: object = None):
+        """
+        Gets a setting based on the Guild on the context.
+        :param ctx: The Context of the command.
+        :param setting: The name of the setting that we need.
+        :param default: The default value for this setting if it was not found or it was not requested.
+        :return: The value of the setting, or None if nothing was found.
+        """
+        # If there is no database, throw an exception
+        if not self.db:
+            raise DatabaseRequired("Loading settings requires a MongoDB Database")
+
+        # If the setting is not registered, throw an exception
+        if setting not in self.settings:
+            raise ValueError("The setting does not exists.")
+
+        # Create an empty value of the setting
+        empty = default if default else self.settings[setting]()
+
+        # Try to find an item with the same item
+        found = await self.db["settings"].find_one({"_id": str(ctx.guild.id)})
+        # If is not there, return the default value
+        if not found:
+            return empty
+
+        # Check if the setting has the specified setting
+        if setting in found:
+            # If so, return it
+            return found[setting]
+        # Otherwise, return the default value
+        return empty
+
+    def register_setting(self, setting: str, otype: type):
+        """
+        Registers a setting for the get_setting function.
+        :param setting: The name of the setting that we need.
+        :param otype: The type of the setting.
+        """
+        # Convert the text to lowercase
+        lowercase = setting.lower()
+
+        # If is already there, ignore it silently
+        if lowercase in self.settings:
+            return
+
+        # Otherwise, add it
+        self.settings[lowercase] = otype
