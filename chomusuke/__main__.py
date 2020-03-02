@@ -33,7 +33,7 @@ def config_from_env():
     Generates a dict with configuration values from the environment variables.
     """
     # Notify the user
-    LOGGER.info("Loading configuration values from environment variables...")
+    LOGGER.info("Using environment variables for the configuration")
     # Create a dictionary with the info that we need
     output = {
         "token": os.environ["DISCORD_TOKEN"],
@@ -50,14 +50,14 @@ def config_from_json(file):
     Generates a dict with configuration values from a JSON file.
     """
     # Notify the user about the loading
-    LOGGER.info(f"Loading JSON configuration from {file}")
+    LOGGER.info(f"Loading configuration from {file}")
     # Open the file for reading
     with open(file):
         # Get the contents as JSON
         output = json.load(file)
     # If there is no token saved, notify the user and return
     if "token" not in output:
-        LOGGER.critical("No token was found in the JSON configuration file.")
+        LOGGER.critical("The configuration file does not contain the Discord Token")
         sys.exit(4)
     # If everything succeeds, return the output
     return output
@@ -105,13 +105,13 @@ def main():
         # If the JSON file does not exists
         if not os.path.isfile(args.json):
             # Notify the user and return
-            LOGGER.critical(f"The JSON Configuration file was not found ({args.json}).")
+            LOGGER.critical(f"The configuration file {args.json} was not found")
             sys.exit(3)
         # Otherwise, get the configuration
         config = config_from_json(args.json)
     # If there is no configuration type specified
     else:
-        LOGGER.critical("No configuration system was specified.")
+        LOGGER.critical("You need to specify what configuration system should be used")
         sys.exit(2)
 
     # Get the event loop
@@ -136,7 +136,7 @@ def main():
                 LOGGER.error(f"Error while loading {cog}: {type(e).__name__} - {str(e)}")
 
     # Notify the user that we got everything and we are starting the bot
-    LOGGER.info("Everything ready! Booting up...")
+    LOGGER.info("Continuing with logging procedure")
 
     # Start processing everything
     try:
