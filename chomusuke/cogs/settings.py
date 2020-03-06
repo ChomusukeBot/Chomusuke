@@ -17,6 +17,8 @@ class Settings(commands.Cog):
         self.bot = bot
 
     @commands.command()
+    @commands.guild_only()
+    @commands.has_permissions(administrator=True)
     async def setting(self, ctx: commands.Context, setting: str = None, value=None):
         """
         Store and Fetch the settings for the Guild.
