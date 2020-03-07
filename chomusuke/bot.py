@@ -2,7 +2,8 @@ import importlib
 import inspect
 import logging
 
-from discord.ext.commands import AutoShardedBot, Context
+from discord import Guild
+from discord.ext.commands import AutoShardedBot
 from motor.motor_asyncio import AsyncIOMotorClient
 
 from chomusuke.exceptions import DatabaseRequired
@@ -81,10 +82,10 @@ class Chomusuke(AutoShardedBot):
         # Log a message about it
         LOGGER.info("Bot is ready to work!")
 
-    async def save_setting(self, ctx: Context, setting: str, value):
+    async def save_setting(self, guild: Guild, setting: str, value):
         """
         Saves the specified setting.
-        :param ctx: The Context of the command.
+        :param guild: The guild to set the settings from.
         :param setting: The name of the setting to store.
         :param value: The value to store.
         """
@@ -100,15 +101,15 @@ class Chomusuke(AutoShardedBot):
             raise TypeError("The object does not matches the type of the setting.")
 
         # Create the filter and update
-        _filter = {"_id": str(ctx.guild.id)}
+        _filter = {"_id": str(guild.id)}
         update = {"$set": {setting: value}}
         # If we got here, add or update the item
         self.db["settings"].update_one(_filter, update, upsert=True)
 
-    async def get_setting(self, ctx: Context, setting: str, default: object = None):
+    async def get_setting(self, guild: Guild, setting: str, default: object = None):
         """
         Gets a setting based on the Guild on the context.
-        :param ctx: The Context of the command.
+        :param guild: The guild to get the settings from.
         :param setting: The name of the setting that we need.
         :param default: The default value for this setting if it was not found or it was not requested.
         :return: The value of the setting, or None if nothing was found.
@@ -125,7 +126,7 @@ class Chomusuke(AutoShardedBot):
         empty = default if default else self.settings[setting]()
 
         # Try to find an item with the same item
-        found = await self.db["settings"].find_one({"_id": str(ctx.guild.id)})
+        found = await self.db["settings"].find_one({"_id": str(guild.id)})
         # If is not there, return the default value
         if not found:
             return empty
