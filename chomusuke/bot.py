@@ -101,7 +101,7 @@ class Chomusuke(AutoShardedBot):
             raise TypeError("The object does not matches the type of the setting.")
 
         # Create the filter and update
-        _filter = {"_id": str(guild.id)}
+        _filter = {"_id": guild.id}
         update = {"$set": {setting: value}}
         # If we got here, add or update the item
         self.db["settings"].update_one(_filter, update, upsert=True)
@@ -126,7 +126,7 @@ class Chomusuke(AutoShardedBot):
         empty = default if default else self.settings[setting]()
 
         # Try to find an item with the same item
-        found = await self.db["settings"].find_one({"_id": str(guild.id)})
+        found = await self.db["settings"].find_one({"_id": guild.id})
         # If is not there, return the default value
         if not found:
             return empty
