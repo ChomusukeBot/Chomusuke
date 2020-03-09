@@ -1,9 +1,13 @@
-from discord import Embed
+import discord
 from discord.ext import commands
-from discord.ext.commands import Cog
+from git import Repo
+
+DESCRIPTION = "Chomusuke is a Discord Bot created by Lemon#6947 for making servers more productive and fun."
+REVISION = "[{0}](https://github.com/ChomusukeBot/Chomusuke/tree/{1}) from {2}"
+SUPPORT = "[GitHub](https://github.com/ChomusukeBot/Chomusuke/issues) & [Discord](https://discord.gg/Cf6sspj)"
 
 
-class Basics(Cog):
+class Basics(commands.Cog):
     """
     A set of basic information commands for Chomusuke.
     """
@@ -11,24 +15,28 @@ class Basics(Cog):
         """
         Initializes a new instance of the Basics cog.
         """
+        # Save the branch and latest commit
         self.bot = bot
 
-    @commands.command()
-    async def info(self, ctx):
+    @commands.command(aliases=["info"])
+    async def about(self, ctx: commands.Context):
         """
         Shows some basic information about the Bot.
         """
-        # Format the description for adding it later
-        description = "Chomusuke is a Discord Bot created with the intention of " \
-                      "providing productive integrations for Developers and Gamers.\n\n" \
-                      "[Support (GitHub)](https://github.com/ChomusukeBot/Chomusuke/issues) | " \
-                      "[Support (Discord)](https://discord.gg/Cf6sspj) | " \
-                      "[Roadmap](https://github.com/ChomusukeBot/Chomusuke/projects)\n\n" \
-                      ""
+        # Get some information from the git repository
+        repo = Repo(".git")
+        short_hash = repo.git.rev_parse(repo.head, short=True)
+        long_hash = repo.head.commit
+        branch = repo.head.ref
+
         # Create an embed for showing the info
-        embed = Embed(title=f"About {self.bot.user.name}", description=description,
-                      url="https://github.com/ChomusukeBot", color=0xE40025)
-        # Set the thumbnail to the image of the repository
+        embed = discord.Embed(title=f"About Chomusuke", description=DESCRIPTION,
+                              url="https://github.com/ChomusukeBot", color=0xE40025)
+        # Set the thumbnail to the image of the GitHub organization
         embed.set_thumbnail(url="https://avatars2.githubusercontent.com/u/52353631")
+        # And add a couple of fields that we need
+        embed.add_field(name="Version", value=REVISION.format(short_hash, long_hash, branch), inline=True)
+        embed.add_field(name="Support", value=SUPPORT, inline=True)
+        embed.add_field(name="Stats", value="{0} guilds\n{1} users".format(len(self.bot.guilds), len(self.bot.users)))
         # And finally send the embed
         await ctx.send(embed=embed)
