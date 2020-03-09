@@ -105,16 +105,14 @@ class Welcome(commands.Cog):
 
         # Try to get the message
         message = settings.get("msg", None)
-        # If there is no message, log it and return
+        # If there is no message, return
         if not message:
-            LOGGER.error(f"Guild {member.guild.id} has welcome messages enabled but no Message set!")
             return
 
         # Try to get the the channel to use
         channel_id = settings.get("channel", 0)
-        # If there is no channel, log it and return
+        # If there is no channel, return
         if not channel_id:
-            LOGGER.error(f"Guild {member.guild.id} has welcome messages enabled but no Channel set!")
             return
 
         # Request the channel on the guild
