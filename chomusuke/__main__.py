@@ -37,7 +37,7 @@ def config_from_env():
     # Create a dictionary with the info that we need
     output = {
         "token": os.environ["DISCORD_TOKEN"],
-        "prefix": os.environ.get("DISCORD_PREFIX", "&"),
+        "prefix": os.environ.get("DISCORD_PREFIX", "!"),
         "cogs": os.environ.get("DISCORD_COGS", "").split(","),
         "database": os.environ.get("MONGODB_URL", "")
     }
