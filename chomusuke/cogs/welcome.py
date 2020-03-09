@@ -17,55 +17,54 @@ class Welcome(commands.Cog):
         if not bot.db:
             # Raise an exception
             raise DatabaseRequired("The Welcome Messages need a database")
-        # Register the setting
-        bot.register_setting("welcome_enabled", bool)
-        bot.register_setting("welcome_message", str)
-        bot.register_setting("welcome_channel", int)
         # And save the bot
         self.bot = bot
 
-    @commands.group()
+    @commands.group(invoke_without_command=True)
     @commands.guild_only()
     @commands.has_permissions(administrator=True)
     async def welcome(self, ctx):
         """
         Group of commands for modifying the custom welcome messages.
         """
+        # Try to get the settings for the current guild and channel
+        settings = await self.bot.db["welcome"].find_one({"_id": ctx.guild.id}) or {}
+        channel = self.bot.get_channel(settings.get("channel", 0))
+        # Create the message with the correct contents
+        message = "Welcome messages are " + ("enabled" if settings.get("enabled", False) else "disabled") + "\n"
+        message += (f"They will be sent to {channel.mention}" if channel else "No channel is set or is invalid") + "\n"
+        message += ("The message is\n```\n" + settings["msg"] + "\n```" if settings.get("msg", None)
+                    else "There is no message set")
+        # And send it
+        await ctx.send(message)
 
     @welcome.command()
     @commands.guild_only()
     @commands.has_permissions(administrator=True)
-    async def activation(self, ctx: commands.Context, toggle: bool):
+    async def activation(self, ctx: commands.Context, enabled: bool):
         """
-        Changes the activation of the custom welcome messages.
+        Enables or Disables the custom welcome messages.
         """
-        # Save the activation
-        await self.bot.save_setting(ctx.guild, "welcome_enabled", toggle)
+        # Save the activation of the welcome messages
+        await self.bot.db["welcome"].find_one_and_update({"_id": ctx.guild.id},
+                                                         {"$set": {"enabled": enabled}},
+                                                         upsert=True)
         # And notify about it
-        await ctx.send("The welcome messages have been " + ("enabled" if toggle else "disabled"))
+        await ctx.send("The welcome messages have been " + ("enabled" if enabled else "disabled"))
 
     @welcome.command()
     @commands.guild_only()
     @commands.has_permissions(administrator=True)
-    async def message(self, ctx: commands.Context, *, message: str = None):
+    async def message(self, ctx: commands.Context, *, message: str):
         """
-        Gets or sets the welcome message for this server.
+        Sets the welcome message for this server.
         """
-        # If there is a help message
-        if message:
-            # Save the message
-            await self.bot.save_setting(ctx.guild, "welcome_message", message)
-            # And notify about it
-            await ctx.send(f"The welcome message was set to:\n```\n{message}\n```")
-        else:
-            # Try to get the message
-            message = await self.bot.get_setting(ctx.guild, "welcome_message")
-            # If there is no message, notify the user and return
-            if not message:
-                await ctx.send("There is no welcome message set for this guild.")
-            # Otherwise, just send it
-            else:
-                await ctx.send(f"The welcome message is set to:\n```\n{message}\n```")
+        # Save the welcome message
+        await self.bot.db["welcome"].find_one_and_update({"_id": ctx.guild.id},
+                                                         {"$set": {"msg": message}},
+                                                         upsert=True)
+        # And notify about it
+        await ctx.send(f"The welcome message was set to:\n```\n{message}\n```")
 
     @welcome.command()
     @commands.guild_only()
@@ -81,7 +80,9 @@ class Welcome(commands.Cog):
             return
 
         # Save the ID of the Channel
-        await self.bot.save_setting(ctx.guild, "welcome_channel", channel.id)
+        await self.bot.db["welcome"].find_one_and_update({"_id": ctx.guild.id},
+                                                         {"$set": {"channel": channel.id}},
+                                                         upsert=True)
         # And notify about it
         await ctx.send(f"The channel for welcome messages was set to {channel.mention}")
 
@@ -91,36 +92,41 @@ class Welcome(commands.Cog):
         Shows the welcome message to the member that just joined.
         :param member: The member that just joined.
         """
-        # Get the activation of the join messages for the current guild
-        activation = await self.bot.get_setting(member.guild, "welcome_enabled")
-        # If is disabled or it was never toggled, log it return
-        if not activation:
+        # Get the settings for the current guild
+        settings = await self.bot.db["welcome"].find_one({"_id": member.guild.id})
+
+        # If there are no settings, return
+        if not settings:
+            return
+
+        # If the settings are disabled, return
+        if not settings.get("enabled", False):
             return
 
         # Try to get the message
-        message = await self.bot.get_setting(member.guild, "welcome_message")
+        message = settings.get("msg", None)
         # If there is no message, log it and return
         if not message:
-            LOGGER.warning(f"Server {member.guild.id} has welcome messages enabled but no message set!")
+            LOGGER.error(f"Guild {member.guild.id} has welcome messages enabled but no Message set!")
             return
 
         # Try to get the the channel to use
-        channel_id = await self.bot.get_setting(member.guild, "welcome_channel")
+        channel_id = settings.get("channel", 0)
         # If there is no channel, log it and return
         if not channel_id:
-            LOGGER.warning(f"Server {member.guild.id} has welcome messages enabled but no channel set!")
+            LOGGER.error(f"Guild {member.guild.id} has welcome messages enabled but no Channel set!")
             return
 
         # Request the channel on the guild
         channel = self.bot.get_channel(channel_id)
         # If the channel is not available (not present or no access), log it and return
         if not channel:
-            LOGGER.warning(f"The channel {channel_id} for guild {member.guild.id} was not found!")
+            LOGGER.error(f"The Channel {channel_id} for Guild {member.guild.id} was not found!")
             return
 
         # If the channel is not part of the guild, log it and return
         if channel.guild != member.guild:
-            LOGGER.warning(f"The channel {channel_id} is not part of the guild {member.guild.id}!")
+            LOGGER.error(f"The Channel {channel_id} is not part of the Guild {member.guild.id}!")
             return
 
         # If we got here, send a message to the channel
