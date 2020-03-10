@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Launch Bot - Env" type="PythonConfigurationType" factoryName="Python">
-    <module name="chomusuke_discord" />
+    <module name="Chomusuke" />
     <option name="INTERPRETER_OPTIONS" value="" />
     <option name="PARENT_ENVS" value="true" />
     <envs>
