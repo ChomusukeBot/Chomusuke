@@ -176,7 +176,7 @@ class Tags(commands.Cog):
         # Otherwise, create an embed
         embed = discord.Embed()
         # Add the information
-        embed.title = "About the tag \"{0}\"".format(item["_id"])
+        embed.title = 'About the tag "{0}"'.format(item["_id"])
         embed.description = item["content"] + "\n\n"
         embed.description += f"Usage: {usage}\n"
         embed.description += f"Created by {author} on **{creation}**"
