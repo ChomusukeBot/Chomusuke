@@ -46,7 +46,7 @@ class Chomusuke(AutoShardedBot):
         Imports a cog with importlib and adds it to a.
         """
         # Notify that we are attempting to import the cog
-        LOGGER.info(f"Loading the cog '{name}'")
+        LOGGER.info('Loading the cog "%s"', name)
         # Split the name sent
         split = name.split(":")
 

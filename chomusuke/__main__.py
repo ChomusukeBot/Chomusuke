@@ -50,7 +50,7 @@ def config_from_json(file):
     Generates a dict with configuration values from a JSON file.
     """
     # Notify the user about the loading
-    LOGGER.info(f"Loading configuration from {file}")
+    LOGGER.info("Loading configuration from %s", file)
     # Open the file for reading
     with open(file):
         # Get the contents as JSON
@@ -85,7 +85,7 @@ def main():
     # Configure the logging system
     configure_logging()
     # And notify the user that we are starting the bot
-    LOGGER.info(f"Starting up Chomusuke v{version} on {platform.platform()}")
+    LOGGER.info("Starting up Chomusuke %s on %s", version, platform.platform())
 
     # Get the parsed command line arguments
     args = parse_args()
@@ -105,7 +105,7 @@ def main():
         # If the JSON file does not exists
         if not os.path.isfile(args.json):
             # Notify the user and return
-            LOGGER.critical(f"The configuration file {args.json} was not found")
+            LOGGER.critical("The configuration file %s was not found", args.json)
             sys.exit(3)
         # Otherwise, get the configuration
         config = config_from_json(args.json)
@@ -132,8 +132,8 @@ def main():
             try:
                 bot.import_cog(cog)
             # If we failed
-            except Exception as e:
-                LOGGER.error(f"Error while loading {cog}: {type(e).__name__} - {str(e)}")
+            except Exception:
+                LOGGER.exception(f"Error while loading %s", cog)
 
     # Notify the user that we got everything and we are starting the bot
     LOGGER.info("Continuing with logging procedure")

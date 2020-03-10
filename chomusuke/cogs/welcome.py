@@ -119,15 +119,15 @@ class Welcome(commands.Cog):
         channel = self.bot.get_channel(channel_id)
         # If the channel is not available (not present or no access), log it and return
         if not channel:
-            LOGGER.error(f"The Channel {channel_id} for Guild {member.guild.id} was not found!")
+            LOGGER.error("The Channel %s for Guild %s was not found!", channel_id, member.guild.id)
             return
 
         # If the channel is not part of the guild, log it and return
         if channel.guild != member.guild:
-            LOGGER.error(f"The Channel {channel_id} is not part of the Guild {member.guild.id}!")
+            LOGGER.error("The Channel %s is not part of the Guild %s!", channel_id, member.guild.id)
             return
 
         # If we got here, send a message to the channel
         await channel.send(f"{member.mention} {message}")
         # And log about it
-        LOGGER.info(f"Welcome message sent to {member.id} on channel {channel_id} for guild {member.guild.id}")
+        LOGGER.info("Welcome message sent to %s on channel %s for guild %s", member.id, channel_id, member.guild.id)

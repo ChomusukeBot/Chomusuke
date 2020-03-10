@@ -25,7 +25,7 @@ class Owner(commands.Cog):
         Disconnects the bot and closes all of the API connections.
         """
         # Notify that we are closing the bot
-        LOGGER.warning(f'Shutdown requested by "{ctx.author.name}#{ctx.author.discriminator}" ({ctx.author.id})')
+        LOGGER.warning('Shutdown requested by "%s#%s" (%s)', ctx.author.name, ctx.author.discriminator, ctx.author.id)
         # Send a message to show that we are disconnecting
         await ctx.send(f"{ctx.author.mention} Bye!")
         # Close the bot connection
