@@ -2,11 +2,8 @@ import importlib
 import inspect
 import logging
 
-from discord import Guild
 from discord.ext.commands import AutoShardedBot
 from motor.motor_asyncio import AsyncIOMotorClient
-
-from chomusuke.exceptions import DatabaseRequired
 
 LOGGER = logging.getLogger("chomusuke")
 
