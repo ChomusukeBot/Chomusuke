@@ -1,0 +1,23 @@
+{
+    "name": "Chomusuke",
+    "description": "Chomusuke is a Discord Bot created by Lemon that adds useful and fun features to Discord Servers. Is meant to be used by both Gamers that want to have a good time and Developers that want to be productive.",
+    "repository": "https://github.com/ChomusukeBot/Chomusuke",
+    "env": {
+        "DISCORD_TOKEN": {
+            "description": "The Bot Token use to log into Discord.",
+            "required": true
+        },
+        "DISCORD_PREFIX": {
+            "description": "The Prefix to use on the commands. The default is !.",
+            "required": false
+        },
+        "DISCORD_COGS": {
+            "description": "The Cogs to load. By default, nothing is loaded.",
+            "required": false
+        },
+        "MONGODB_URL": {
+            "description": "MongoDB database to use. Leave blank to not use a database.",
+            "required": false
+        }
+    }
+}
