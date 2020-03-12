@@ -1,0 +1,27 @@
+image: Visual Studio 2019
+version: 0.1.0.{build}
+
+notifications:
+  - provider: Webhook
+    url:
+      secure: RQOjbD0a6023xZNVZ7zzk7PjRpoF448yAGSM8koDLhmkmzUM5yPCgmaad8aJqIs8RUNIyviWWVKgyVoHDnXu54LGOTNVOCWgVLopKG8FA/Ofnc/R3wb8e0Y1VLME2TDc4OyE8nUxd78/lJY7qiz0pR1OZDgDregNYwczlizdDJNHSumbS17VNKQygVqdwoqd
+
+environment:
+  matrix:
+    - PYTHON: "C:\\Python35-x64"
+    - PYTHON: "C:\\Python36-x64"
+    - PYTHON: "C:\\Python37-x64"
+    - PYTHON: "C:\\Python38-x64"
+
+matrix:
+  allow_failures:
+    - PYTHON: "C:\\Python35-x64"
+
+init:
+  - "set PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"
+
+install:
+  - "python -m pip install -r requirements.txt -r requirements-dev.txt"
+
+build:
+  - "python -m flake8"
