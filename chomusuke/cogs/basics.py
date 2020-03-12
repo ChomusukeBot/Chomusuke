@@ -1,3 +1,6 @@
+import os
+import platform
+
 import discord
 from discord.ext import commands
 from git import Repo
@@ -29,6 +32,13 @@ class Basics(commands.Cog):
         long_hash = repo.head.commit
         branch = repo.head.ref
 
+        # If we have a DYNO environment variable, we are using Heroku
+        if "DYNO" in os.environ:
+            system = "Heroku"
+        # Otherwise, save the name of the system
+        else:
+            system = platform.system()
+
         # Create an embed for showing the info
         embed = discord.Embed(title=f"About Chomusuke", description=DESCRIPTION,
                               url="https://github.com/ChomusukeBot", color=0xE40025)
@@ -38,5 +48,6 @@ class Basics(commands.Cog):
         embed.add_field(name="Version", value=REVISION.format(short_hash, long_hash, branch), inline=True)
         embed.add_field(name="Support", value=SUPPORT, inline=True)
         embed.add_field(name="Stats", value="{0} guilds\n{1} users".format(len(self.bot.guilds), len(self.bot.users)))
+        embed.add_field(name="Running on", value=system)
         # And finally send the embed
         await ctx.send(embed=embed)
