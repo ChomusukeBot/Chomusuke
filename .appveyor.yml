@@ -23,5 +23,5 @@ init:
 install:
   - "python -m pip install -r requirements.txt -r requirements-dev.txt"
 
-build:
+build_script:
   - "python -m flake8"
