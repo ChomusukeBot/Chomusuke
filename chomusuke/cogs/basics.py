@@ -3,7 +3,7 @@ import platform
 
 import discord
 from discord.ext import commands
-from git import Repo, NoSuchPathError
+from git import NoSuchPathError, Repo
 
 DESCRIPTION = "Chomusuke is a Discord Bot created by Lemon#6947 for making servers more productive and fun."
 REVISION = "[{0}](https://github.com/ChomusukeBot/Chomusuke/tree/{1}) from {2}"
