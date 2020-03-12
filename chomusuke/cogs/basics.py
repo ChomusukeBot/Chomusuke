@@ -3,7 +3,7 @@ import platform
 
 import discord
 from discord.ext import commands
-from git import Repo
+from git import Repo, NoSuchPathError
 
 DESCRIPTION = "Chomusuke is a Discord Bot created by Lemon#6947 for making servers more productive and fun."
 REVISION = "[{0}](https://github.com/ChomusukeBot/Chomusuke/tree/{1}) from {2}"
@@ -26,11 +26,17 @@ class Basics(commands.Cog):
         """
         Shows some basic information about the Bot.
         """
-        # Get some information from the git repository
-        repo = Repo(".git")
-        short_hash = repo.git.rev_parse(repo.head, short=True)
-        long_hash = repo.head.commit
-        branch = repo.head.ref
+        try:
+            # Get some information from the git repository
+            repo = Repo(".git")
+            short_hash = repo.git.rev_parse(repo.head, short=True)
+            long_hash = repo.head.commit
+            branch = repo.head.ref
+            # And save it
+            git_info = REVISION.format(short_hash, long_hash, branch)
+        except NoSuchPathError:
+            # If the repo was not found, say it
+            git_info = "No Git Repo Found"
 
         # If we have a DYNO environment variable, we are using Heroku
         if "DYNO" in os.environ:
@@ -45,7 +51,7 @@ class Basics(commands.Cog):
         # Set the thumbnail to the image of the GitHub organization
         embed.set_thumbnail(url="https://avatars2.githubusercontent.com/u/52353631")
         # And add a couple of fields that we need
-        embed.add_field(name="Version", value=REVISION.format(short_hash, long_hash, branch), inline=True)
+        embed.add_field(name="Version", value=git_info, inline=True)
         embed.add_field(name="Support", value=SUPPORT, inline=True)
         embed.add_field(name="Stats", value="{0} guilds\n{1} users".format(len(self.bot.guilds), len(self.bot.users)))
         embed.add_field(name="Running on", value=system)
